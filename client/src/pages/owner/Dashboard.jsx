@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
 import { DollarSign, Car, Calendar, Clock, CheckCircle2, TrendingUp } from 'lucide-react';
-import { dummyDashboardData } from '../../assets/assets';
 
 const Dashboard = () => {
-  const { axios, currency, cars } = useAppContext();
+  const { axios, currency } = useAppContext();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,19 +12,13 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const res = await axios.get('/api/owner/dashboard');
-      if (res.data.success && res.data.dashboardData) {
+      if (res.data.success) {
         setData(res.data.dashboardData);
       } else {
-        setData({
-          ...dummyDashboardData,
-          totalCars: cars.length || 12,
-        });
+        toast.error(res.data.message);
       }
     } catch (err) {
-      setData({
-        ...dummyDashboardData,
-        totalCars: cars.length || 12,
-      });
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -33,96 +26,96 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [cars]);
+  }, []);
 
   if (loading) {
-    return <div className="p-10 text-slate-500 font-mono">Loading telemetry dashboard...</div>;
+    return <div className="p-10 text-slate-400 font-mono">Loading telemetry dashboard...</div>;
   }
 
   return (
     <div className="p-6 md:p-10 w-full max-w-6xl flex flex-col gap-8">
       {/* Title */}
       <div>
-        <span className="text-xs font-mono font-bold tracking-widest text-cyan-600 uppercase">FLEET ANALYTICS & REVENUE</span>
-        <h1 className="text-3xl font-black text-slate-900 mt-0.5">Owner Command Center</h1>
+        <span className="text-xs font-mono tracking-widest text-cyan-400 uppercase">FLEET ANALYTICS</span>
+        <h1 className="text-3xl font-black text-white">Owner Command Center</h1>
       </div>
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center justify-between text-cyan-600">
-            <span className="text-xs font-mono uppercase font-bold text-slate-500">Monthly Revenue</span>
+        <div className="p-5 rounded-2xl glass-card border border-cyan-500/30 flex flex-col gap-2">
+          <div className="flex items-center justify-between text-cyan-400">
+            <span className="text-xs font-mono uppercase">Monthly Revenue</span>
             <DollarSign className="w-5 h-5" />
           </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">
-            <span className="text-cyan-600">{currency}</span>
-            {(data?.monthlyRevenue || 560000).toLocaleString('en-IN')}
+          <p className="text-2xl font-black text-white font-mono">
+            {currency}
+            {data?.monthlyRevenue || 0}
           </p>
-          <span className="text-[11px] text-emerald-600 flex items-center gap-1 font-mono font-semibold">
-            <TrendingUp className="w-3.5 h-3.5" /> +24% vs last cycle
+          <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
+            <TrendingUp className="w-3 h-3" /> Confirmed bookings
           </span>
         </div>
 
-        <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center justify-between text-indigo-600">
-            <span className="text-xs font-mono uppercase font-bold text-slate-500">Fleet Vehicles</span>
+        <div className="p-5 rounded-2xl glass-card border border-purple-500/30 flex flex-col gap-2">
+          <div className="flex items-center justify-between text-purple-400">
+            <span className="text-xs font-mono uppercase">Listed Supercars</span>
             <Car className="w-5 h-5" />
           </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">{data?.totalCars || cars.length || 12}</p>
-          <span className="text-[11px] text-slate-500 font-mono">Active in fleet</span>
+          <p className="text-2xl font-black text-white font-mono">{data?.totalCars || 0}</p>
+          <span className="text-[10px] text-slate-400 font-mono">Active in fleet</span>
         </div>
 
-        <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center justify-between text-amber-600">
-            <span className="text-xs font-mono uppercase font-bold text-slate-500">Pending Requests</span>
+        <div className="p-5 rounded-2xl glass-card border border-amber-500/30 flex flex-col gap-2">
+          <div className="flex items-center justify-between text-amber-400">
+            <span className="text-xs font-mono uppercase">Pending Requests</span>
             <Clock className="w-5 h-5" />
           </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">{data?.pendingBookings || 1}</p>
-          <span className="text-[11px] text-amber-600 font-mono font-semibold">Awaiting host approval</span>
+          <p className="text-2xl font-black text-white font-mono">{data?.pendingBookings || 0}</p>
+          <span className="text-[10px] text-amber-300 font-mono">Awaiting approval</span>
         </div>
 
-        <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col gap-2">
-          <div className="flex items-center justify-between text-emerald-600">
-            <span className="text-xs font-mono uppercase font-bold text-slate-500">Completed Rentals</span>
+        <div className="p-5 rounded-2xl glass-card border border-emerald-500/30 flex flex-col gap-2">
+          <div className="flex items-center justify-between text-emerald-400">
+            <span className="text-xs font-mono uppercase">Completed Rentals</span>
             <CheckCircle2 className="w-5 h-5" />
           </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">{data?.completedBookings || 2}</p>
-          <span className="text-[11px] text-emerald-600 font-mono font-semibold">Fulfilled reservations</span>
+          <p className="text-2xl font-black text-white font-mono">{data?.completedBookings || 0}</p>
+          <span className="text-[10px] text-emerald-400 font-mono">Fulfilled rentals</span>
         </div>
       </div>
 
       {/* Recent Bookings Table */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col gap-4">
-        <h3 className="text-lg font-black text-slate-900">Recent Fleet Reservations</h3>
+      <div className="p-6 rounded-3xl glass-card border border-white/10 flex flex-col gap-4">
+        <h3 className="text-lg font-bold text-white font-sans">Recent Fleet Reservations</h3>
 
         {data?.recentBookings?.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400">
-                  <th className="pb-3 font-semibold">Vehicle</th>
-                  <th className="pb-3 font-semibold">Pickup Date</th>
-                  <th className="pb-3 font-semibold">Return Date</th>
-                  <th className="pb-3 font-semibold">Total Revenue</th>
-                  <th className="pb-3 font-semibold">Status</th>
+                <tr className="border-b border-white/10 text-slate-400">
+                  <th className="pb-3">Vehicle</th>
+                  <th className="pb-3">Pickup Date</th>
+                  <th className="pb-3">Return Date</th>
+                  <th className="pb-3">Total Earnings</th>
+                  <th className="pb-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-white/5 text-slate-200">
                 {data.recentBookings.map((b) => (
-                  <tr key={b._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 flex items-center gap-3">
-                      <img src={b.car?.image} className="w-10 h-8 rounded-lg object-cover border border-slate-200" alt="" />
-                      <span className="font-bold text-slate-900">{b.car?.title || `${b.car?.brand || ''} ${b.car?.model || ''}`}</span>
+                  <tr key={b._id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 flex items-center gap-2">
+                      <img src={b.car?.image} className="w-8 h-8 rounded-lg object-cover" alt="" />
+                      <span className="font-bold text-white">{b.car?.title || 'Supercar Spec'}</span>
                     </td>
-                    <td className="py-3.5 text-slate-600">{b.pickupDate ? new Date(b.pickupDate).toLocaleDateString() : 'Instant'}</td>
-                    <td className="py-3.5 text-slate-600">{b.returnDate ? new Date(b.returnDate).toLocaleDateString() : 'TBD'}</td>
-                    <td className="py-3.5 text-slate-900 font-bold">
-                      <span className="text-cyan-600">{currency}</span>
-                      {(b.price || 75000).toLocaleString('en-IN')}
+                    <td className="py-3.5 text-slate-300">{new Date(b.pickupDate).toLocaleDateString()}</td>
+                    <td className="py-3.5 text-slate-300">{new Date(b.returnDate).toLocaleDateString()}</td>
+                    <td className="py-3.5 text-cyan-400 font-bold">
+                      {currency}
+                      {b.price}
                     </td>
                     <td className="py-3.5">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] uppercase font-bold border border-emerald-200 text-emerald-700 bg-emerald-50">
-                        {b.status || 'Confirmed'}
+                      <span className="px-2.5 py-1 rounded-full text-[10px] uppercase font-bold border border-cyan-500/40 text-cyan-300 bg-cyan-500/10">
+                        {b.status}
                       </span>
                     </td>
                   </tr>
@@ -131,7 +124,7 @@ const Dashboard = () => {
             </table>
           </div>
         ) : (
-          <p className="text-xs text-slate-500 font-mono py-4">No recent reservations recorded.</p>
+          <p className="text-xs text-slate-400 font-mono py-4">No recent reservations recorded.</p>
         )}
       </div>
     </div>

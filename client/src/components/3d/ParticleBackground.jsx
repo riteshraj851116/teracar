@@ -18,15 +18,15 @@ const ParticleBackground = () => {
     container.appendChild(renderer.domElement);
 
     // Particle Geometry
-    const particleCount = 280;
+    const particleCount = 450;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
 
-    const cyan = new THREE.Color(0x0ea5e9);
-    const indigo = new THREE.Color(0x6366f1);
-    const slate = new THREE.Color(0x94a3b8);
-    const palette = [cyan, indigo, slate];
+    const cyan = new THREE.Color(0x06b6d4);
+    const purple = new THREE.Color(0x8b5cf6);
+    const blue = new THREE.Color(0x3b82f6);
+    const palette = [cyan, purple, blue];
 
     for (let i = 0; i < particleCount * 3; i += 3) {
       positions[i] = (Math.random() - 0.5) * 1200;
@@ -43,10 +43,11 @@ const ParticleBackground = () => {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 2.2,
+      size: 2.5,
       vertexColors: true,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
     });
 
     const particles = new THREE.Points(geometry, material);
@@ -57,8 +58,8 @@ const ParticleBackground = () => {
     let mouseY = 0;
 
     const onMouseMove = (event) => {
-      mouseX = (event.clientX - window.innerWidth / 2) * 0.05;
-      mouseY = (event.clientY - window.innerHeight / 2) * 0.05;
+      mouseX = (event.clientX - window.innerWidth / 2) * 0.08;
+      mouseY = (event.clientY - window.innerHeight / 2) * 0.08;
     };
     window.addEventListener('mousemove', onMouseMove);
 
@@ -73,11 +74,11 @@ const ParticleBackground = () => {
     const animate = () => {
       animId = requestAnimationFrame(animate);
 
-      particles.rotation.x += 0.0002;
-      particles.rotation.y += 0.0003;
+      particles.rotation.x += 0.0003;
+      particles.rotation.y += 0.0005;
 
-      camera.position.x += (mouseX - camera.position.x) * 0.02;
-      camera.position.y += (-mouseY - camera.position.y) * 0.02;
+      camera.position.x += (mouseX - camera.position.x) * 0.03;
+      camera.position.y += (-mouseY - camera.position.y) * 0.03;
       camera.lookAt(scene.position);
 
       renderer.render(scene, camera);
@@ -95,7 +96,7 @@ const ParticleBackground = () => {
     };
   }, []);
 
-  return <div ref={mountRef} className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-60" />;
+  return <div ref={mountRef} className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-70" />;
 };
 
 export default ParticleBackground;
