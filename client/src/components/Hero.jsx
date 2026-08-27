@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
-import Hero3DCanvas from './3d/Hero3DCanvas';
+import HeroVisual3D from './3d/HeroVisual3D';
 import { motion } from 'motion/react';
-import { Search, Calendar, MapPin, ShieldCheck, Zap, Star } from 'lucide-react';
+import { Search, Calendar, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const Hero = () => {
   const { navigate, pickupDate, setPickupDate, returnDate, setReturnDate } = useAppContext();
@@ -13,107 +13,107 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative pt-6 pb-16 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto overflow-hidden">
-      {/* Background Neon Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
+    <section className="relative pt-8 pb-16 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto overflow-hidden">
+      {/* Background Soft Maroon & Slate Gradients */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-100/50 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
+      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-zinc-200/50 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-        {/* Left Column: Hero Content & Search Form */}
+        {/* Left Column: Hero Copywriting with Maroon and Black Palette */}
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
+          initial={{ opacity: 0, x: -25 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           className="lg:col-span-6 flex flex-col gap-6"
         >
           {/* Top Telemetry Chip */}
-          <div className="inline-flex items-center gap-2 self-start bg-slate-900/80 border border-cyan-500/30 px-3.5 py-1.5 rounded-full text-xs font-mono text-cyan-300 shadow-lg shadow-cyan-500/10">
-            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
-            <span>INSTANT DISPATCH // 3D REALTIME PREVIEW</span>
+          <div className="inline-flex items-center gap-2 self-start bg-rose-50/90 border border-rose-200/80 px-4 py-1.5 rounded-full text-xs font-mono text-[#800020] shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-[#800020] fill-[#800020]" />
+            <span className="font-bold tracking-wide">LUXURY MOBILITY // INSTANT DISPATCH</span>
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
+          {/* Main Title: Black & Deep Maroon */}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-black">
             Drive The <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-500 neon-text-cyan">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#800020] via-[#991B1B] to-black">
               Future of Luxury
             </span>
           </h1>
 
-          <p className="text-sm md:text-base text-slate-300 leading-relaxed font-normal">
-            Experience next-generation supercar & luxury rentals with interactive 3D studio inspection, zero hassle booking, and instant white-glove delivery.
+          <p className="text-sm md:text-base text-zinc-700 leading-relaxed font-normal">
+            Experience an elite fleet of exotic supercars and executive vehicles with seamless white-glove delivery, zero security deposit, and transparent daily rates.
           </p>
 
-          {/* Search / Booking Glass Bar */}
+          {/* Search & Reservation Glass Card */}
           <form
             onSubmit={handleSearch}
-            className="p-4 rounded-2xl glass-card border border-cyan-500/20 shadow-2xl flex flex-col gap-4"
+            className="p-5 rounded-3xl bg-white/80 backdrop-blur-2xl border border-zinc-200/90 shadow-xl flex flex-col gap-4"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Pickup Date Input */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {/* Pickup Date */}
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-mono uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
+                <label className="text-[11px] font-mono uppercase tracking-wider text-black font-bold flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#800020]" />
                   <span>Pickup Date</span>
                 </label>
                 <input
                   type="date"
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
-                  className="glass-input px-3.5 py-2 rounded-xl text-xs outline-none w-full"
+                  className="glass-input px-3.5 py-2.5 rounded-2xl text-xs outline-none w-full font-medium"
                 />
               </div>
 
-              {/* Return Date Input */}
+              {/* Return Date */}
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-mono uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
+                <label className="text-[11px] font-mono uppercase tracking-wider text-black font-bold flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#800020]" />
                   <span>Return Date</span>
                 </label>
                 <input
                   type="date"
                   value={returnDate}
                   onChange={(e) => setReturnDate(e.target.value)}
-                  className="glass-input px-3.5 py-2 rounded-xl text-xs outline-none w-full"
+                  className="glass-input px-3.5 py-2.5 rounded-2xl text-xs outline-none w-full font-medium"
                 />
               </div>
             </div>
 
-            {/* Action Button */}
+            {/* Action Button: Black with Maroon Accent */}
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-cyan-600 text-slate-950 font-bold text-sm tracking-wide hover:brightness-110 transition-all shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-black text-white font-bold text-xs tracking-wider uppercase hover:bg-[#800020] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <Search className="w-4 h-4 stroke-[2.5]" />
-              <span>SEARCH AVAILABLE VEHICLES</span>
+              <span>SEARCH AVAILABLE SUPERCAR FLEET</span>
             </button>
           </form>
 
           {/* Trust Badges */}
-          <div className="grid grid-cols-3 gap-3 pt-2 text-center">
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-white/5">
-              <p className="text-xl font-bold text-cyan-400 font-mono">500+</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Supercars & Luxury</p>
+          <div className="grid grid-cols-3 gap-3 pt-1 text-center">
+            <div className="p-3.5 rounded-2xl bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-sm">
+              <p className="text-xl font-black text-black font-mono">12+</p>
+              <p className="text-[11px] text-zinc-600 font-medium mt-0.5">Exotics in Fleet</p>
             </div>
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-white/5">
-              <p className="text-xl font-bold text-purple-400 font-mono">100%</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Verified Fleet</p>
+            <div className="p-3.5 rounded-2xl bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-sm">
+              <p className="text-xl font-black text-[#800020] font-mono">100%</p>
+              <p className="text-[11px] text-zinc-600 font-medium mt-0.5">Verified Fleet</p>
             </div>
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-white/5">
-              <p className="text-xl font-bold text-amber-400 font-mono">4.95 ★</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Customer Rating</p>
+            <div className="p-3.5 rounded-2xl bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-sm">
+              <p className="text-xl font-black text-black font-mono">4.98 ★</p>
+              <p className="text-[11px] text-zinc-600 font-medium mt-0.5">VIP Rating</p>
             </div>
           </div>
         </motion.div>
 
-        {/* Right Column: Three.js 3D Studio Canvas */}
+        {/* Right Column: Three.js Interactive Kinetic Showcase */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="lg:col-span-6 w-full h-[420px] lg:h-[500px]"
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="lg:col-span-6 w-full h-[460px] lg:h-[540px]"
         >
-          <Hero3DCanvas />
+          <HeroVisual3D />
         </motion.div>
       </div>
     </section>
