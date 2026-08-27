@@ -6,7 +6,7 @@ import {AppProvider} from './context/AppContext.jsx'
 import {MotionConfig} from 'motion/react'
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
+  <BrowserRouter basename={import.meta.env.BASE_URL}>
     <AppProvider>
       <MotionConfig viewport={{once: true}}>
         <App />
