@@ -4,8 +4,10 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { dummyCarData } from "../assets/assets";
 
-// Base URL setup with fallback
-const backendURL = import.meta.env.VITE_BASE_URL || "http://localhost:5002";
+// Base URL setup: relative in production on Vercel, localhost in local dev
+const backendURL = import.meta.env.VITE_BASE_URL !== undefined 
+  ? import.meta.env.VITE_BASE_URL 
+  : (import.meta.env.DEV ? "http://localhost:5002" : "");
 axios.defaults.baseURL = backendURL;
 
 export const AppContext = createContext();
