@@ -35,6 +35,8 @@ jobs:
           npm ci
 
       - name: Build Client
+        env:
+          VITE_BASE_PATH: /teracar/
         run: |
           cd client
           npm run build
