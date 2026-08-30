@@ -113,6 +113,9 @@ export const AppProvider = ({ children }) => {
       return false;
     }
 
+    // Check cached demo user
+    const cachedUser = JSON.parse(localStorage.getItem("teracar_user") || "null");
+
     try {
       const { data } = await axios.get("/api/user/data", {
         headers: {
@@ -123,24 +126,20 @@ export const AppProvider = ({ children }) => {
       if (data?.success && data?.user) {
         setUser(data.user);
         setIsOwner(data.user.role === "owner");
+        localStorage.setItem("teracar_user", JSON.stringify(data.user));
         return true;
       }
-
-      setToken("");
-      setUser(null);
-      setIsOwner(false);
-      return false;
-
     } catch (error) {
-      console.error("fetchUser error:", error.response?.data?.message || error.message);
-
-      if (error.response?.status === 401) {
-        setToken("");
-        setUser(null);
-        setIsOwner(false);
-      }
-      return false;
+      console.warn("fetchUser live API notice:", error.response?.data?.message || error.message);
     }
+
+    if (cachedUser) {
+      setUser(cachedUser);
+      setIsOwner(cachedUser.role === "owner");
+      return true;
+    }
+
+    return false;
   }, [token]);
 
   // 3. Get all available cars
@@ -167,6 +166,7 @@ export const AppProvider = ({ children }) => {
     setUser(null);
     setIsOwner(false);
     localStorage.removeItem("token");
+    localStorage.removeItem("teracar_user");
     delete axios.defaults.headers.common["Authorization"];
     toast.success("Successfully signed out");
     navigate("/");

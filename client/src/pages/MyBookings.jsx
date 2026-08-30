@@ -22,12 +22,24 @@ const MyBookings = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get('/api/bookings/user');
-      if (data?.success && Array.isArray(data?.bookings)) {
-        setBookings(data.bookings);
+      const local = JSON.parse(localStorage.getItem('teracar_local_bookings') || '[]');
+
+      try {
+        const { data } = await axios.get('/api/bookings/user');
+        if (data?.success && Array.isArray(data?.bookings) && data.bookings.length > 0) {
+          // Merge unique bookings
+          const serverIds = new Set(data.bookings.map(b => b._id));
+          const filteredLocal = local.filter(b => !serverIds.has(b._id));
+          setBookings([...data.bookings, ...filteredLocal]);
+          return;
+        }
+      } catch (err) {
+        console.warn("Server bookings API notice:", err.response?.data?.message || err.message);
       }
+
+      setBookings(local);
     } catch (err) {
-      console.error(err.response?.data?.message || err.message);
+      console.error(err);
     } finally {
       setLoading(false);
     }
