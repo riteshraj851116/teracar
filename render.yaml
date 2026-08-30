@@ -1,0 +1,39 @@
+services:
+  # ─── 1. Backend Web Service ───────────────────────────────────────────────
+  - type: web
+    name: teracar-backend-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: MONGODB_URI
+        value: mongodb+srv://CarRentalDB:raj123@cluster0.vpfltmb.mongodb.net
+      - key: JWT_SECRET
+        value: jobsphere_super_secret_key_change_this_later
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5002
+
+  # ─── 2. Frontend Static Site ──────────────────────────────────────────────
+  - type: web
+    name: teracar-luxury-fleet
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    plan: free
+    envVars:
+      - key: VITE_CURRENCY
+        value: ₹
+      - key: VITE_BASE_URL
+        fromService:
+          type: web
+          name: teracar-backend-api
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
