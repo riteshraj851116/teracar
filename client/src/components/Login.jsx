@@ -1,149 +1,215 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
-import toast from 'react-hot-toast';
-import { X, Lock, Mail, User as UserIcon, Sparkles, ArrowRight } from 'lucide-react';
+import React, { useState } from "react";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
+import { ArrowRight, X, Lock, Mail, User } from "lucide-react";
+import { motion } from "motion/react";
+import { playUiClick } from "../utils/audioEngine";
 
 const Login = () => {
-  const { setShowLogin, axios, setToken, navigate } = useAppContext();
-
-  const [state, setState] = useState('login');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { setShowLogin, axios, setToken, fetchUser } = useAppContext();
+  
+  const [state, setState] = useState("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onSubmitHandler = async (event) => {
-    try {
-      event.preventDefault();
-      setLoading(true);
-      const { data } = await axios.post(`/api/user/${state}`, { name, email, password });
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+  };
 
-      if (data.success) {
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
-        setShowLogin(false);
-        toast.success(state === 'login' ? 'Successfully authenticated!' : 'Account created!');
-      } else {
-        toast.error(data.message);
+  const switchMode = () => {
+    playUiClick();
+    setState((prev) => (prev === "login" ? "register" : "login"));
+    resetForm();
+  };
+
+  const onSubmitHandler = async (event) => {
+    event.preventDefault();
+    if (loading) return;
+    playUiClick();
+
+    try {
+      setLoading(true);
+
+      const payload =
+        state === "register"
+          ? {
+              name: name.trim(),
+              email: email.trim().toLowerCase(),
+              password,
+            }
+          : {
+              email: email.trim().toLowerCase(),
+              password,
+            };
+
+      const { data } = await axios.post(`/api/user/${state}`, payload);
+
+      if (!data?.success) {
+        toast.error(data?.message || "Authentication failed");
+        return;
       }
+
+      if (!data?.token) {
+        toast.error("Authentication token was not received");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+      axios.defaults.headers.common.Authorization = `Bearer ${data.token}`;
+
+      const userFetched = await fetchUser(data.token);
+
+      if (!userFetched) {
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common.Authorization;
+        setToken("");
+        toast.error("Unable to authenticate session");
+        return;
+      }
+
+      toast.success(
+        state === "login"
+          ? "Welcome back to TERACAR Atelier."
+          : "Account created successfully."
+      );
+
+      resetForm();
+      setShowLogin(false);
+      
     } catch (error) {
-      toast.error(error.message);
+      console.error("Authentication error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Authentication failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyle = "w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded px-3.5 py-3 text-xs font-mono text-[#090D16] placeholder:text-[#94A3B8] outline-none focus:border-[#090D16] transition-colors mt-1";
+  const labelStyle = "text-[10px] font-mono text-[#64748B] uppercase tracking-wider block";
+
   return (
     <div
-      onClick={() => setShowLogin(false)}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+      onClick={() => {
+        if (!loading) setShowLogin(false);
+      }}
     >
-      <div
+      <motion.section
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="relative w-full max-w-md bg-white border border-[#E2E8F0] rounded-lg p-6 sm:p-8 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md p-8 rounded-3xl glass-card border border-cyan-500/30 shadow-2xl overflow-hidden"
       >
-        {/* Top Glow Ambient */}
-        <div className="absolute -top-16 -right-16 w-40 h-40 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none" />
-
-        {/* Close Button */}
+        {/* Close */}
         <button
+          type="button"
+          className="absolute top-5 right-5 text-[#64748B] hover:text-[#090D16] cursor-pointer"
           onClick={() => setShowLogin(false)}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+          disabled={loading}
         >
-          <X className="w-5 h-5" />
+          <X size={18} />
         </button>
 
-        {/* Modal Header */}
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3 text-cyan-400">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h3 className="text-2xl font-black text-white">
-            {state === 'login' ? 'Welcome Back' : 'Create Executive Pass'}
-          </h3>
-          <p className="text-xs text-slate-400 mt-1">
-            {state === 'login' ? 'Sign in to access your 3D bookings & fleet' : 'Join VELOCITY to unlock 3D supercar rentals'}
+        {/* Header */}
+        <div className="flex flex-col gap-1 mb-6">
+          <span className="text-[9px] font-mono tracking-[0.2em] text-[#64748B] uppercase">
+            MEMBER AUTHENTICATION // 01
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold uppercase text-[#090D16] font-editorial">
+            {state === "login" ? "Client Access" : "Create Account"}
+          </h2>
+          <p className="text-xs text-[#64748B]">
+            {state === "login"
+              ? "Sign in to manage reservations and concierge requests."
+              : "Register for bespoke vehicle reservations."}
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmitHandler} className="flex flex-col gap-4">
-          {state === 'register' && (
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-mono text-cyan-400">Full Name</label>
-              <div className="relative">
-                <UserIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                  placeholder="e.g. Alex Wright"
-                  className="glass-input pl-10 pr-4 py-2.5 rounded-xl text-xs w-full outline-none"
-                  type="text"
-                  required
-                />
-              </div>
-            </div>
+        <form className="flex flex-col gap-3.5" onSubmit={onSubmitHandler}>
+          {state === "register" && (
+            <label className={labelStyle}>
+              <span>Full Name</span>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="RITESH RAJ"
+                autoComplete="name"
+                className={inputStyle}
+                required
+              />
+            </label>
           )}
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-mono text-cyan-400">Email Address</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-                placeholder="executive@domain.com"
-                className="glass-input pl-10 pr-4 py-2.5 rounded-xl text-xs w-full outline-none"
-                type="email"
-                required
-              />
-            </div>
-          </div>
+          <label className={labelStyle}>
+            <span>Email Address</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="CLIENT@DOMAIN.COM"
+              autoComplete="email"
+              className={inputStyle}
+              required
+            />
+          </label>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-mono text-cyan-400">Password</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-                placeholder="••••••••"
-                className="glass-input pl-10 pr-4 py-2.5 rounded-xl text-xs w-full outline-none"
-                type="password"
-                required
-              />
-            </div>
-          </div>
+          <label className={labelStyle}>
+            <span>Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete={state === "login" ? "current-password" : "new-password"}
+              minLength={6}
+              className={inputStyle}
+              required
+            />
+          </label>
 
-          <button
-            type="submit"
+          <button 
+            type="submit" 
+            className="mt-2 w-full flex items-center justify-center gap-2 px-5 py-3 bg-[#090D16] hover:bg-[#1E293B] text-white rounded text-xs font-mono uppercase font-bold tracking-wider cursor-pointer disabled:opacity-50 transition-colors" 
             disabled={loading}
-            className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-cyan-600 text-slate-950 font-bold text-xs tracking-wider uppercase hover:brightness-110 transition-all shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            <span>{loading ? 'Authenticating...' : state === 'login' ? 'Sign In' : 'Create Account'}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>
+              {loading
+                ? "AUTHENTICATING..."
+                : state === "login"
+                ? "ENTER ATELIER"
+                : "REGISTER"}
+            </span>
+            <ArrowRight size={14} />
           </button>
         </form>
 
-        {/* Toggle Mode Footer */}
-        <div className="mt-6 pt-4 border-t border-white/10 text-center text-xs text-slate-400">
-          {state === 'register' ? (
-            <p>
-              Already registered?{' '}
-              <button onClick={() => setState('login')} className="text-cyan-400 font-bold hover:underline cursor-pointer">
-                Sign In
-              </button>
-            </p>
-          ) : (
-            <p>
-              New to VELOCITY?{' '}
-              <button onClick={() => setState('register')} className="text-cyan-400 font-bold hover:underline cursor-pointer">
-                Create an Account
-              </button>
-            </p>
-          )}
+        {/* Switch Mode Footer */}
+        <div className="mt-5 pt-4 border-t border-[#E2E8F0] flex items-center justify-between text-xs font-mono">
+          <span className="text-[#64748B]">
+            {state === "login" ? "New client?" : "Existing account?"}
+          </span>
+          <button 
+            type="button" 
+            onClick={switchMode} 
+            disabled={loading}
+            className="font-bold text-[#090D16] uppercase hover:underline cursor-pointer"
+          >
+            {state === "login" ? "Create Profile" : "Sign In"}
+          </button>
         </div>
-      </div>
+      </motion.section>
     </div>
   );
 };

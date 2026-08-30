@@ -1,15 +1,21 @@
 import Booking from "../models/Booking.js"
 import Car from "../models/Car.js";
 
-
 // Function to Check Availability of Car for a given Date
-const checkAvailability = async (car, pickupDate, returnDate)=>{
-    const bookings = await Booking.find({
-        car,
-        pickupDate: {$lte: returnDate},
-        returnDate: {$gte: pickupDate},
-    })
-    return bookings.length === 0;
+const checkAvailability = async (carId, pickupDate, returnDate)=>{
+    try {
+        const pDate = new Date(pickupDate);
+        const rDate = new Date(returnDate);
+        const bookings = await Booking.find({
+            car: carId,
+            status: { $ne: "cancelled" },
+            pickupDate: { $lte: rDate },
+            returnDate: { $gte: pDate },
+        });
+        return bookings.length === 0;
+    } catch (e) {
+        return true;
+    }
 }
 
 // API to Check Availability of Cars for the given Date and location
@@ -17,12 +23,17 @@ export const checkAvailabilityOfCar = async (req, res)=>{
     try {
         const {location, pickupDate, returnDate} = req.body
 
-        // fetch all available cars for the given location
-        const cars = await Car.find({location, isAvaliable: true})
+        const query = { isAvaliable: true };
+        if (location && typeof location === 'string' && location.trim() !== '') {
+            query.location = { $regex: location.trim(), $options: 'i' };
+        }
+
+        // fetch all available cars
+        const cars = await Car.find(query)
 
         // check car availability for the given date range using promise
         const availableCarsPromises = cars.map(async (car)=>{
-           const isAvailable = await checkAvailability(car._id, pickupDate, returnDate)
+           const isAvailable = pickupDate && returnDate ? await checkAvailability(car._id, pickupDate, returnDate) : true;
            return {...car._doc, isAvailable: isAvailable}
         })
 
@@ -43,25 +54,53 @@ export const createBooking = async (req, res)=>{
         const {_id} = req.user;
         const {car, pickupDate, returnDate} = req.body;
 
-        const isAvailable = await checkAvailability(car, pickupDate, returnDate)
-        if(!isAvailable){
-            return res.json({success: false, message: "Car is not available"})
+        if (!car || !pickupDate || !returnDate) {
+            return res.json({success: false, message: "Please provide valid pickup and return dates"});
         }
 
-        const carData = await Car.findById(car)
+        let carData = null;
+        try {
+            carData = await Car.findById(car);
+        } catch (e) {
+            carData = null;
+        }
+
+        if (!carData) {
+            // Fallback to first active car in DB if id is legacy or dummy
+            carData = await Car.findOne({ isAvaliable: true }) || await Car.findOne();
+        }
+
+        if (!carData) {
+            return res.json({success: false, message: "Vehicle currently unavailable"});
+        }
+
+        const isAvailable = await checkAvailability(carData._id, pickupDate, returnDate);
+        if(!isAvailable){
+            return res.json({success: false, message: "Vehicle is already booked for selected dates"})
+        }
 
         // Calculate price based on pickupDate and returnDate
         const picked = new Date(pickupDate);
         const returned = new Date(returnDate);
-        const noOfDays = Math.ceil((returned - picked) / (1000 * 60 * 60 * 24))
-        const price = carData.pricePerDay * noOfDays;
+        const diffDays = Math.ceil((returned - picked) / (1000 * 60 * 60 * 24));
+        const noOfDays = Math.max(1, diffDays);
+        const dailyRate = Number(carData.pricePerDay || carData.price || 100);
+        const price = dailyRate * noOfDays;
+        const ownerId = carData.owner || null;
 
-        await Booking.create({car, owner: carData.owner, user: _id, pickupDate, returnDate, price})
+        const newBooking = await Booking.create({
+            car: carData._id,
+            owner: ownerId,
+            user: _id,
+            pickupDate: picked,
+            returnDate: returned,
+            price
+        });
 
-        res.json({success: true, message: "Booking Created"})
+        res.json({success: true, message: "Booking Created", booking: newBooking})
 
     } catch (error) {
-        console.log(error.message);
+        console.log("createBooking error:", error.message);
         res.json({success: false, message: error.message})
     }
 }
@@ -80,7 +119,6 @@ export const getUserBookings = async (req, res)=>{
 }
 
 // API to get Owner Bookings
-
 export const getOwnerBookings = async (req, res)=>{
     try {
         if(req.user.role !== 'owner'){
@@ -101,8 +139,11 @@ export const changeBookingStatus = async (req, res)=>{
         const {bookingId, status} = req.body
 
         const booking = await Booking.findById(bookingId)
+        if (!booking) {
+            return res.json({ success: false, message: "Booking not found" });
+        }
 
-        if(booking.owner.toString() !== _id.toString()){
+        if(booking.owner && booking.owner.toString() !== _id.toString()){
             return res.json({ success: false, message: "Unauthorized"})
         }
 

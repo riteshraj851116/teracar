@@ -1,119 +1,270 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import CarCard from '../components/CarCard';
-import ParticleBackground from '../components/3d/ParticleBackground';
-import { Search, Filter, SlidersHorizontal, Car } from 'lucide-react';
+import CarComparisonModal from '../components/CarComparisonModal';
+import { 
+  Search, 
+  SlidersHorizontal, 
+  Car, 
+  Filter, 
+  Scale, 
+  Fuel, 
+  Gauge, 
+  ArrowUpDown,
+  RotateCcw
+} from 'lucide-react';
+import { playUiClick } from '../utils/audioEngine';
 
-const CATEGORIES = ['All', 'Supercar', 'Luxury', 'Electric', 'SUV'];
+const CATEGORIES = ['All', 'Supercar', 'Luxury', 'Electric', 'SUV', 'Sedan'];
+const FUEL_TYPES = ['All', 'Petrol', 'Hybrid', 'Diesel', 'Electric'];
+const TRANSMISSIONS = ['All', 'Automatic', 'Semi-Automatic', 'Manual'];
 
 const Cars = () => {
-  const { cars } = useAppContext();
+  const { cars, loadingCars, currency } = useAppContext();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [fuelType, setFuelType] = useState('All');
+  const [transmission, setTransmission] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
+  const [maxPrice, setMaxPrice] = useState(2500);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const filteredCars = cars
-    .filter((c) => {
-      const matchesSearch =
-        c.title?.toLowerCase().includes(search.toLowerCase()) ||
-        c.brand?.toLowerCase().includes(search.toLowerCase()) ||
-        c.category?.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory =
-        category === 'All' || c.category?.toLowerCase() === category.toLowerCase();
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'price-low') return (a.pricePerDay || a.price) - (b.pricePerDay || b.price);
-      if (sortBy === 'price-high') return (b.pricePerDay || b.price) - (a.pricePerDay || a.price);
-      return 0;
-    });
+  const maxAvailablePrice = useMemo(() => {
+    if (!cars.length) return 2500;
+    return Math.max(...cars.map(c => Number(c.pricePerDay || c.price || 0)), 1500);
+  }, [cars]);
+
+  const filteredCars = useMemo(() => {
+    return cars
+      .filter((c) => {
+        const q = search.toLowerCase();
+        const titleMatch = c.title?.toLowerCase().includes(q);
+        const modelMatch = c.model?.toLowerCase().includes(q);
+        const brandMatch = c.brand?.toLowerCase().includes(q);
+        const categoryMatch = c.category?.toLowerCase().includes(q);
+        const locationMatch = c.location?.toLowerCase().includes(q);
+        const matchesSearch = !search || titleMatch || modelMatch || brandMatch || categoryMatch || locationMatch;
+
+        const matchesCategory =
+          category === 'All' || c.category?.toLowerCase() === category.toLowerCase();
+
+        const carFuel = (c.fuel_type || c.fuelType || '').toLowerCase();
+        const matchesFuel = fuelType === 'All' || carFuel.includes(fuelType.toLowerCase());
+
+        const carTrans = (c.transmission || '').toLowerCase();
+        const matchesTransmission = transmission === 'All' || carTrans.includes(transmission.toLowerCase());
+
+        const price = Number(c.pricePerDay || c.price || 0);
+        const matchesPrice = price <= maxPrice;
+
+        return matchesSearch && matchesCategory && matchesFuel && matchesTransmission && matchesPrice;
+      })
+      .sort((a, b) => {
+        const priceA = a.pricePerDay || a.price || 0;
+        const priceB = b.pricePerDay || b.price || 0;
+        if (sortBy === 'price-low') return priceA - priceB;
+        if (sortBy === 'price-high') return priceB - priceA;
+        return 0;
+      });
+  }, [cars, search, category, fuelType, transmission, maxPrice, sortBy]);
+
+  const resetAllFilters = () => {
+    playUiClick();
+    setSearch('');
+    setCategory('All');
+    setFuelType('All');
+    setTransmission('All');
+    setSortBy('featured');
+    setMaxPrice(maxAvailablePrice);
+  };
 
   return (
-    <div className="relative min-h-screen py-10 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto">
-      <ParticleBackground />
-
-      <div className="relative z-10 flex flex-col gap-8">
+    <div className="min-h-screen py-10 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-6">
+        
         {/* Page Header */}
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-mono tracking-widest text-cyan-400 uppercase flex items-center gap-1.5">
-            <Car className="w-3.5 h-3.5" />
-            <span>FULL INVENTORY // {cars.length} VEHICLES AVAILABLE</span>
-          </span>
-          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
-            Explore All Vehicles
-          </h1>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+          <div>
+            <span className="text-[10px] font-mono tracking-[0.2em] text-[#64748B] uppercase block">
+              CATALOG // {cars.length} AVAILABLE CHASSIS
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#090D16] uppercase font-editorial tracking-tight mt-1">
+              Atelier Fleet
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { playUiClick(); setCompareModalOpen(true); }}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-[#F8FAFC] text-[#090D16] border border-[#E2E8F0] rounded text-xs font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <Scale className="w-3.5 h-3.5" />
+              <span>Compare</span>
+            </button>
+            <button
+              onClick={() => { playUiClick(); setShowAdvancedFilters(!showAdvancedFilters); }}
+              className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded text-xs font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
+                showAdvancedFilters
+                  ? 'bg-[#090D16] text-white border border-[#090D16]'
+                  : 'bg-white text-[#090D16] border border-[#E2E8F0] hover:border-[#090D16]'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Filters</span>
+            </button>
+          </div>
         </div>
 
-        {/* Filter Controls Bar */}
-        <div className="p-4 rounded-2xl glass-card border border-white/10 flex flex-col lg:flex-row items-center justify-between gap-4">
-          {/* Search Input */}
-          <div className="relative w-full lg:w-96">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by brand, title (e.g. Porsche, Ferrari)..."
-              className="glass-input pl-10 pr-4 py-2.5 rounded-xl text-xs w-full outline-none"
-            />
-          </div>
+        {/* Primary Filter Bar */}
+        <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 flex flex-col gap-4 shadow-xs">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+            
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="SEARCH MODEL, BRAND, CITY..."
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded pl-10 pr-4 py-2.5 text-xs font-mono text-[#090D16] uppercase placeholder:text-[#94A3B8] outline-none focus:border-[#090D16]"
+              />
+            </div>
 
-          {/* Category Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  category === cat
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-lg shadow-cyan-500/20'
-                    : 'bg-slate-900/60 text-slate-400 hover:text-white border border-white/5'
-                }`}
+            {/* Category Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => { playUiClick(); setCategory(cat); }}
+                  className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded border transition-colors cursor-pointer whitespace-nowrap ${
+                    category === cat
+                      ? 'bg-[#090D16] text-white border-[#090D16]'
+                      : 'bg-[#F8FAFC] text-[#475569] border-[#E2E8F0] hover:border-[#090D16]'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded px-3 py-1.5">
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#64748B]" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent text-xs font-mono uppercase text-[#090D16] outline-none cursor-pointer"
               >
-                {cat}
-              </button>
-            ))}
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
           </div>
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
-            <SlidersHorizontal className="w-4 h-4 text-slate-400" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="glass-input px-3 py-2 rounded-xl text-xs outline-none bg-slate-900 text-slate-200"
-            >
-              <option value="featured">Sort by: Featured</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
+          {/* Advanced Filters Expand */}
+          {showAdvancedFilters && (
+            <div className="pt-3 border-t border-[#E2E8F0] grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] font-mono uppercase text-[#64748B] flex items-center gap-1">
+                  <Fuel className="w-3 h-3" />
+                  Powertrain
+                </label>
+                <div className="flex flex-wrap gap-1">
+                  {FUEL_TYPES.map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setFuelType(f)}
+                      className={`px-2.5 py-1 rounded text-[10px] font-mono uppercase border cursor-pointer ${
+                        fuelType === f
+                          ? 'bg-[#090D16] text-white border-[#090D16]'
+                          : 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]'
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] font-mono uppercase text-[#64748B] flex items-center gap-1">
+                  <Gauge className="w-3 h-3" />
+                  Transmission
+                </label>
+                <div className="flex flex-wrap gap-1">
+                  {TRANSMISSIONS.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTransmission(t)}
+                      className={`px-2.5 py-1 rounded text-[10px] font-mono uppercase border cursor-pointer ${
+                        transmission === t
+                          ? 'bg-[#090D16] text-white border-[#090D16]'
+                          : 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between text-[10px] font-mono uppercase">
+                  <span className="text-[#64748B]">Max Rate:</span>
+                  <span className="font-bold text-[#090D16]">{currency}{maxPrice}/day</span>
+                </div>
+                <input
+                  type="range"
+                  min={100}
+                  max={maxAvailablePrice}
+                  step={50}
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  className="accent-[#090D16] cursor-pointer"
+                />
+                <button
+                  onClick={resetAllFilters}
+                  className="self-end text-[9px] font-mono uppercase text-[#64748B] hover:text-[#090D16] flex items-center gap-1 cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" /> Reset
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Vehicle Grid */}
-        {filteredCars.length > 0 ? (
+        {loadingCars ? (
+          <div className="py-20 text-center text-xs font-mono tracking-widest text-[#64748B] uppercase">
+            Querying atelier database...
+          </div>
+        ) : filteredCars.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCars.map((car) => (
               <CarCard key={car._id} car={car} />
             ))}
           </div>
         ) : (
-          <div className="p-16 text-center glass-card rounded-2xl border border-white/10 my-8">
-            <Filter className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-white">No vehicles found</h3>
-            <p className="text-xs text-slate-400 mt-1">Try resetting your search filters.</p>
+          <div className="py-16 text-center bg-white border border-[#E2E8F0] rounded-lg flex flex-col items-center gap-3">
+            <Filter className="w-8 h-8 text-[#94A3B8]" />
+            <h3 className="text-base font-bold text-[#090D16] uppercase font-mono">No Matching Chassis Found</h3>
             <button
-              onClick={() => {
-                setSearch('');
-                setCategory('All');
-              }}
-              className="mt-4 px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"
+              onClick={resetAllFilters}
+              className="px-4 py-2 bg-[#090D16] text-white rounded text-xs font-mono uppercase tracking-wider cursor-pointer"
             >
-              Clear All Filters
+              Reset Filters
             </button>
           </div>
         )}
       </div>
+
+      <CarComparisonModal
+        isOpen={compareModalOpen}
+        onClose={() => setCompareModalOpen(false)}
+      />
     </div>
   );
 };

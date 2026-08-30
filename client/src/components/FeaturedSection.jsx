@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import CarCard from './CarCard';
-import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Filter } from 'lucide-react';
+import { ArrowRight, Filter } from 'lucide-react';
+import { playUiClick } from '../utils/audioEngine';
 
-const CATEGORIES = ['All', 'Supercar', 'Luxury', 'Electric', 'SUV'];
+const CATEGORIES = ['All', 'Supercar', 'Sedan', 'SUV', 'Electric'];
 
 const FeaturedSection = () => {
-  const { cars, navigate } = useAppContext();
+  const { cars, navigate, loadingCars } = useAppContext();
   const [activeCategory, setActiveCategory] = useState('All');
 
   const filteredCars =
@@ -20,32 +20,32 @@ const FeaturedSection = () => {
         );
 
   return (
-    <section className="py-16 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto">
+    <section className="py-12 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto">
+      
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full text-xs font-mono text-cyan-400 mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>CURATED SELECTION</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-            Explore Premium Fleet
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#64748B] block mb-1">
+            COLLECTION // AVAILABLE ATELIER FLEET
+          </span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#090D16] uppercase font-editorial tracking-tight">
+            Curated Showroom
           </h2>
-          <p className="text-slate-400 text-sm mt-1 max-w-xl">
-            Select from our ultra-exclusive, hand-picked collection of high-performance supercars and luxury vehicles.
-          </p>
         </div>
 
-        {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {/* Category Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all whitespace-nowrap cursor-pointer ${
+              onClick={() => {
+                playUiClick();
+                setActiveCategory(cat);
+              }}
+              className={`px-3.5 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded border transition-colors cursor-pointer whitespace-nowrap ${
                 activeCategory === cat
-                  ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-slate-950 font-bold shadow-lg shadow-cyan-500/25'
-                  : 'glass-card text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  ? 'bg-[#090D16] text-white border-[#090D16]'
+                  : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#090D16] hover:text-[#090D16]'
               }`}
             >
               {cat}
@@ -54,36 +54,44 @@ const FeaturedSection = () => {
         </div>
       </div>
 
-      {/* Car Cards Grid */}
-      {filteredCars.length > 0 ? (
+      {/* Grid */}
+      {loadingCars ? (
+        <div className="py-20 text-center text-xs font-mono tracking-widest text-[#64748B] uppercase">
+          Loading atelier fleet...
+        </div>
+      ) : filteredCars.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCars.slice(0, 6).map((car) => (
             <CarCard key={car._id} car={car} />
           ))}
         </div>
       ) : (
-        <div className="p-12 text-center glass-card rounded-2xl border border-white/10 my-8">
-          <Filter className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-          <p className="text-slate-300 font-medium">No vehicles matching category "{activeCategory}"</p>
+        <div className="p-12 bg-white border border-[#E2E8F0] rounded text-center flex flex-col items-center gap-3 my-4">
+          <Filter className="w-8 h-8 text-[#94A3B8]" />
+          <p className="text-[#090D16] font-mono uppercase text-sm font-bold">No vehicles found in "{activeCategory}"</p>
           <button
             onClick={() => setActiveCategory('All')}
-            className="mt-4 px-4 py-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-semibold"
+            className="px-4 py-2 bg-[#090D16] text-white rounded text-[10px] font-mono uppercase tracking-wider cursor-pointer"
           >
-            Reset Filters
+            Show All
           </button>
         </div>
       )}
 
-      {/* View All Button */}
-      <div className="mt-12 text-center">
+      {/* View All */}
+      <div className="mt-10 text-center">
         <button
-          onClick={() => navigate('/cars')}
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 font-bold text-sm hover:bg-cyan-500 hover:text-slate-950 transition-all duration-300 shadow-xl cursor-pointer group"
+          onClick={() => {
+            playUiClick();
+            navigate('/cars');
+          }}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#090D16] border border-[#E2E8F0] hover:border-[#090D16] rounded text-xs font-mono uppercase font-semibold tracking-wider transition-colors cursor-pointer shadow-xs"
         >
-          <span>EXPLORE COMPLETE FLEET ({cars.length})</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <span>View Complete Catalog ({cars.length} Models)</span>
+          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
+      
     </section>
   );
 };

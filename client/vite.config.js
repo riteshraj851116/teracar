@@ -5,5 +5,17 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/teracar/',
+  base: '/',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'gsap': ['gsap'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'motion': ['motion'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 })

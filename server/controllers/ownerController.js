@@ -20,37 +20,64 @@ export const changeRoleToOwner = async (req, res)=>{
 // API to List Car
 
 export const addCar = async (req, res)=>{
+    const imageFile = req.file;
     try {
         const {_id} = req.user;
-        let car = JSON.parse(req.body.carData);
-        const imageFile = req.file;
+        let car = typeof req.body.carData === 'string' ? JSON.parse(req.body.carData) : req.body.carData;
 
-        // Upload Image to ImageKit
-        const fileBuffer = fs.readFileSync(imageFile.path)
-        const response = await imagekit.upload({
-            file: fileBuffer,
-            fileName: imageFile.originalname,
-            folder: '/cars'
-        })
+        if (!imageFile) {
+            return res.json({ success: false, message: "Image file is required" });
+        }
 
-        // optimization through imagekit URL transformation
-        var optimizedImageUrl = imagekit.url({
-            path : response.filePath,
-            transformation : [
-                {width: '1280'}, // Width resizing
-                {quality: 'auto'}, // Auto compression
-                { format: 'webp' }  // Convert to modern format
-            ]
+        let image = '';
+        try {
+            const fileBuffer = fs.readFileSync(imageFile.path);
+            const response = await imagekit.upload({
+                file: fileBuffer,
+                fileName: imageFile.originalname,
+                folder: '/cars'
+            });
+
+            image = imagekit.url({
+                path : response.filePath,
+                transformation : [
+                    {width: '1280'},
+                    {quality: 'auto'},
+                    { format: 'webp' }
+                ]
+            });
+        } catch (ikError) {
+            console.log("ImageKit upload error, using fallback format:", ikError.message);
+            const fileBuffer = fs.readFileSync(imageFile.path);
+            image = `data:${imageFile.mimetype};base64,${fileBuffer.toString('base64')}`;
+        }
+
+        const modelName = car.model || car.title || 'Supercar';
+        const carTitle = car.title || `${car.brand} ${modelName}`;
+        const seatsCount = Number(car.seating_capacity || car.seats || 2);
+        const fuel = car.fuel_type || car.fuelType || 'Petrol';
+        const yearVal = Number(car.year || new Date().getFullYear());
+
+        await Car.create({
+            ...car,
+            owner: _id,
+            title: carTitle,
+            model: modelName,
+            year: yearVal,
+            seating_capacity: seatsCount,
+            fuel_type: fuel,
+            image
         });
-
-        const image = optimizedImageUrl;
-        await Car.create({...car, owner: _id, image})
 
         res.json({success: true, message: "Car Added"})
 
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
+    } finally {
+        if (imageFile && imageFile.path && fs.existsSync(imageFile.path)) {
+            try { fs.unlinkSync(imageFile.path); } catch (e) {}
+        }
     }
 }
 
@@ -150,30 +177,35 @@ export const getDashboardData = async (req, res) =>{
 // API to update user image
 
 export const updateUserImage = async (req, res)=>{
+    const imageFile = req.file;
     try {
         const { _id } = req.user;
+        if (!imageFile) {
+            return res.json({ success: false, message: "Image file is required" });
+        }
 
-        const imageFile = req.file;
+        let image = '';
+        try {
+            const fileBuffer = fs.readFileSync(imageFile.path);
+            const response = await imagekit.upload({
+                file: fileBuffer,
+                fileName: imageFile.originalname,
+                folder: '/users'
+            });
 
-        // Upload Image to ImageKit
-        const fileBuffer = fs.readFileSync(imageFile.path)
-        const response = await imagekit.upload({
-            file: fileBuffer,
-            fileName: imageFile.originalname,
-            folder: '/users'
-        })
-
-        // optimization through imagekit URL transformation
-        var optimizedImageUrl = imagekit.url({
-            path : response.filePath,
-            transformation : [
-                {width: '400'}, // Width resizing
-                {quality: 'auto'}, // Auto compression
-                { format: 'webp' }  // Convert to modern format
-            ]
-        });
-
-        const image = optimizedImageUrl;
+            image = imagekit.url({
+                path : response.filePath,
+                transformation : [
+                    {width: '400'},
+                    {quality: 'auto'},
+                    { format: 'webp' }
+                ]
+            });
+        } catch (ikError) {
+            console.log("ImageKit upload error, using fallback format:", ikError.message);
+            const fileBuffer = fs.readFileSync(imageFile.path);
+            image = `data:${imageFile.mimetype};base64,${fileBuffer.toString('base64')}`;
+        }
 
         await User.findByIdAndUpdate(_id, {image});
         res.json({success: true, message: "Image Updated" })
@@ -181,5 +213,9 @@ export const updateUserImage = async (req, res)=>{
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
+    } finally {
+        if (imageFile && imageFile.path && fs.existsSync(imageFile.path)) {
+            try { fs.unlinkSync(imageFile.path); } catch (e) {}
+        }
     }
 }   
