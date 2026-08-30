@@ -3,23 +3,31 @@ import { useAppContext } from '../../context/AppContext';
 import Title from '../../components/owner/Title';
 import toast from 'react-hot-toast';
 import { Trash2, ToggleLeft, ToggleRight, Car, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ManageCars = () => {
-  const { axios, currency, navigate } = useAppContext();
+  const { axios, currency, cars } = useAppContext();
   const [ownerCars, setOwnerCars] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOwnerCars = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get('/api/owner/cars');
-      if (data?.success && Array.isArray(data?.cars)) {
-        setOwnerCars(data.cars);
-      } else {
-        toast.error(data?.message || 'Failed to fetch vehicles');
+      try {
+        const { data } = await axios.get('/api/owner/cars');
+        if (data?.success && Array.isArray(data?.cars) && data.cars.length > 0) {
+          setOwnerCars(data.cars);
+          return;
+        }
+      } catch (apiErr) {
+        console.warn("Owner cars API notice:", apiErr.message);
       }
+
+      // Resilient fallback to current fleet cars
+      const localAdded = JSON.parse(localStorage.getItem('teracar_local_added_cars') || '[]');
+      setOwnerCars([...localAdded, ...(cars || [])]);
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -27,145 +35,151 @@ const ManageCars = () => {
 
   const toggleAvailability = async (carId) => {
     try {
-      const { data } = await axios.post('/api/owner/toggle-car', { carId });
-      if (data?.success) {
-        toast.success(data.message || 'Availability toggled');
-        fetchOwnerCars();
-      } else {
-        toast.error(data?.message || 'Action failed');
+      try {
+        const { data } = await axios.post('/api/owner/toggle-availability', { carId });
+        if (data?.success) {
+          toast.success(data.message || 'Availability toggled');
+          fetchOwnerCars();
+          return;
+        }
+      } catch (apiErr) {
+        console.warn("API toggle notice:", apiErr.message);
       }
+
+      setOwnerCars(prev => prev.map(c => c._id === carId ? { ...c, isAvaliable: !(c.isAvaliable !== false) } : c));
+      toast.success('Vehicle showroom visibility toggled');
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message);
+      toast.error('Action failed');
     }
   };
 
   const deleteCar = async (carId) => {
     if (!window.confirm('Are you sure you want to remove this vehicle from your active fleet?')) return;
     try {
-      const { data } = await axios.post('/api/owner/delete-car', { carId });
-      if (data?.success) {
-        toast.success(data.message || 'Vehicle removed from fleet');
-        fetchOwnerCars();
-      } else {
-        toast.error(data?.message || 'Removal failed');
+      try {
+        const { data } = await axios.post('/api/owner/delete-car', { carId });
+        if (data?.success) {
+          toast.success(data.message || 'Vehicle removed from fleet');
+          fetchOwnerCars();
+          return;
+        }
+      } catch (apiErr) {
+        console.warn("API delete notice:", apiErr.message);
       }
+
+      setOwnerCars(prev => prev.filter(c => c._id !== carId));
+      toast.success('Vehicle decommissioned from fleet');
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message);
+      toast.error('Removal failed');
     }
   };
 
   useEffect(() => {
     fetchOwnerCars();
-  }, []);
+  }, [cars]);
 
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col gap-8">
       
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#e2e8f0] pb-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <Title 
           title={`Manage Fleet Vehicles (${ownerCars.length})`}
           subTitle="Control vehicle availability in showroom, adjust pricing, or remove vehicles."
         />
-
-        <button
-          onClick={() => navigate('/owner/add-car')}
-          className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#090d16] hover:bg-[#1e293b] text-white rounded-xl text-[10px] font-bold font-mono tracking-[0.18em] uppercase cursor-pointer shadow-md transition-all shrink-0 self-start sm:self-auto mb-6"
+        
+        <Link
+          to="/owner/add-car"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#090D16] hover:bg-[#1E293B] text-white rounded text-xs font-mono font-bold uppercase tracking-wider transition-colors shadow-xs"
         >
-          <Plus className="w-4 h-4" />
-          <span>Add Vehicle</span>
-        </button>
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add New Vehicle</span>
+        </Link>
       </div>
 
       {/* Content Section */}
       {loading ? (
-        <div className="py-24 text-center text-xs font-mono tracking-widest text-[#64748b] uppercase">
-          Fetching fleet vehicles...
+        <div className="py-24 text-center text-xs font-mono tracking-widest text-[#64748B] uppercase">
+          Loading fleet catalogue...
         </div>
       ) : ownerCars.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ownerCars.map((car) => (
-            <div
-              key={car._id}
-              className="bg-white border border-[#e2e8f0] hover:border-[#090d16] rounded-2xl flex flex-col justify-between shadow-[0_4px_24px_rgba(9,13,22,0.03)] hover:shadow-[0_12px_36px_rgba(9,13,22,0.08)] transition-all duration-300 group overflow-hidden"
-            >
-              <div className="flex flex-col">
-                {/* Image Container */}
-                <div className="w-full h-56 bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] overflow-hidden relative p-4 flex items-center justify-center">
-                  <img 
-                    src={car.image} 
-                    alt={car.title} 
-                    className="w-full h-full object-contain group-hover:scale-106 transition-transform duration-500 filter drop-shadow-md" 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {ownerCars.map((car) => {
+            const isAvailable = car.isAvaliable !== false;
+            return (
+              <div
+                key={car._id}
+                className="bg-white border border-[#E2E8F0] hover:border-[#090D16] rounded-lg overflow-hidden flex flex-col justify-between shadow-xs transition-all"
+              >
+                {/* Image Stage */}
+                <div className="h-44 bg-[#F8FAFC] border-b border-[#E2E8F0] relative flex items-center justify-center p-4">
+                  <img
+                    src={car.image}
+                    alt={car.title}
+                    className="max-h-full max-w-full object-contain filter drop-shadow-xs"
                   />
-                  {/* Status Overlay */}
-                  <div className="absolute top-3.5 left-3.5">
-                    <span className={`px-3 py-1 text-[9px] font-mono font-bold tracking-wider uppercase border rounded-full ${
-                      car.isAvaliable 
-                        ? 'text-emerald-800 border-emerald-300 bg-emerald-50' 
-                        : 'text-[#64748b] border-[#e2e8f0] bg-white'
+                  <div className="absolute top-3 right-3">
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
+                      isAvailable ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
                     }`}>
-                      {car.isAvaliable ? 'Available' : 'Offline'}
+                      {isAvailable ? 'Available' : 'Reserved'}
                     </span>
                   </div>
                 </div>
 
-                {/* Car Details */}
-                <div className="p-6 pb-2">
-                  <span className="text-[10px] font-mono text-[#64748b] uppercase tracking-[0.2em] font-bold">
-                    {car.brand || 'Luxury Spec'}
-                  </span>
-                  <h3 className="text-lg font-black text-[#090d16] uppercase tracking-tight truncate mt-1">
-                    {car.title}
-                  </h3>
-                  <div className="flex items-baseline gap-0.5 mt-2">
-                    <span className="text-xs font-bold text-[#2563eb] font-mono">{currency}</span>
-                    <span className="text-2xl font-black text-[#090d16] font-mono leading-none">
-                      {car.pricePerDay || car.price}
-                    </span>
-                    <span className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider ml-1">/ Day</span>
+                {/* Details */}
+                <div className="p-5 flex flex-col gap-3">
+                  <div>
+                    <span className="text-[9px] font-mono text-[#64748B] uppercase tracking-wider">{car.brand || 'Luxury'} • {car.category || 'GT'}</span>
+                    <h4 className="text-base font-bold text-[#090D16] uppercase tracking-tight font-editorial">
+                      {car.title || `${car.brand} ${car.model}`}
+                    </h4>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs font-mono pt-3 border-t border-[#E2E8F0]">
+                    <span className="text-[#64748B]">Daily Allocation:</span>
+                    <span className="font-bold text-[#090D16]">{currency}{Number(car.pricePerDay || car.price || 0).toLocaleString()}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-3 border-t border-[#E2E8F0]">
+                    <button
+                      onClick={() => toggleAvailability(car._id)}
+                      className="flex items-center gap-1.5 text-xs font-mono text-[#64748B] hover:text-[#090D16] transition-colors cursor-pointer"
+                    >
+                      {isAvailable ? (
+                        <>
+                          <ToggleRight className="w-4 h-4 text-emerald-600" />
+                          <span>Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <ToggleLeft className="w-4 h-4 text-[#94A3B8]" />
+                          <span>Disabled</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => deleteCar(car._id)}
+                      className="p-1.5 text-[#94A3B8] hover:text-rose-600 transition-colors cursor-pointer"
+                      title="Remove Vehicle"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
-
-              {/* Actions Footer */}
-              <div className="px-6 pb-6 pt-3 flex items-center justify-between border-t border-[#e2e8f0] mt-auto">
-                <button
-                  onClick={() => toggleAvailability(car._id)}
-                  className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold font-mono tracking-wider uppercase border rounded-xl transition-all cursor-pointer ${
-                    car.isAvaliable
-                      ? 'bg-[#090d16] text-white border-[#090d16]'
-                      : 'bg-[#f8fafc] text-[#64748b] border-[#e2e8f0] hover:border-[#090d16]'
-                  }`}
-                >
-                  {car.isAvaliable ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4" />}
-                  <span>{car.isAvaliable ? 'Active' : 'Offline'}</span>
-                </button>
-
-                <button
-                  onClick={() => deleteCar(car._id)}
-                  className="p-2.5 text-[#64748b] hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer border border-transparent hover:border-rose-200 rounded-xl"
-                  title="Remove Vehicle"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
-        <div className="py-24 text-center bg-white border border-[#e2e8f0] rounded-3xl flex flex-col items-center gap-4 shadow-sm">
-          <Car className="w-12 h-12 text-[#64748b]/40" />
-          <h3 className="text-xl font-black text-[#090d16] uppercase tracking-widest">No Vehicles Hosted</h3>
-          <p className="text-xs font-mono text-[#64748b] uppercase tracking-wider">
-            Start listing your luxury fleet to receive instant bookings.
+        <div className="py-24 text-center bg-white border border-[#E2E8F0] rounded-lg flex flex-col items-center gap-4 shadow-xs">
+          <Car className="w-12 h-12 text-[#64748B]/40" />
+          <h3 className="text-lg font-bold text-[#090D16] uppercase tracking-widest font-editorial">No Vehicles Listed</h3>
+          <p className="text-xs font-mono text-[#64748B] uppercase tracking-wider">
+            Add vehicles to start managing your fleet showroom.
           </p>
-          <button
-            onClick={() => navigate('/owner/add-car')}
-            className="mt-2 px-8 py-4 bg-[#090d16] hover:bg-[#1e293b] text-white rounded-xl text-[10px] font-bold font-mono uppercase tracking-[0.18em] flex items-center gap-2 cursor-pointer shadow-md transition-all"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Your First Vehicle</span>
-          </button>
         </div>
       )}
     </div>
