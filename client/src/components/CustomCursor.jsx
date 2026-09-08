@@ -109,10 +109,10 @@ const CustomCursor = () => {
       <div
         className={`rounded-full flex items-center justify-center transition-all duration-300 ${
           isText
-            ? 'w-16 h-16 bg-[#651F2A] text-white text-[9px] font-mono tracking-widest font-bold shadow-lg scale-100'
+            ? 'w-16 h-16 bg-[#C5A880] text-[#0B0B0B] text-[9px] font-mono tracking-widest font-bold shadow-2xl scale-100'
             : cursorState.variant === 'interactive'
-            ? 'w-10 h-10 bg-[#111111]/10 border border-[#111111]/40 backdrop-blur-[1px] scale-100'
-            : 'w-3 h-3 bg-[#111111] scale-100'
+            ? 'w-10 h-10 bg-white/10 border border-white/30 backdrop-blur-[1px] scale-100'
+            : 'w-2.5 h-2.5 bg-[#F4F2ED] scale-100'
         }`}
       >
         {isText && <span className="animate-fade-in select-none">{cursorState.text}</span>}

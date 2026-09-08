@@ -1,34 +1,36 @@
 @import "tailwindcss";
 
 /* =========================================================
-   CAR RENTAL — IMMERSIVE EDITORIAL AUTOMOTIVE DESIGN SYSTEM
-   Visual Language inspired by huyml.co
-   --bg:            #F3F1EC (Editorial Canvas / Bone)
-   --bg-secondary:  #EAE7E0
-   --surface:       #FFFFFF
-   --text-primary:  #111111 (Editorial Black)
-   --text-secondary:#707070 (Refined Muted)
-   --black:         #000000
-   --accent:        #651F2A (Deep Burgundy / Maroon)
-   --accent-dark:   #4A141E
-   --border:        #D8D5CF (Thin Editorial Hairline)
-   --border-dark:   #111111
+   CAR RENTAL — PREMIUM AUTOMOTIVE CLUB STYLE DESIGN SYSTEM
+   Visual Reference: 363 Sudbury Automotive Club Aesthetic
+   
+   --bg:             #0B0B0B (Deep Obsidian / Black)
+   --bg-secondary:   #141414 (Rich Dark Neutral)
+   --surface:        #1B1B1B (Dark Architectural Surface)
+   --surface-hover:  #242424 (Surface Interaction State)
+   --text-primary:   #F4F2ED (Off-white / Warm Cream)
+   --text-secondary: #9B9B9B (Refined Muted Metallic)
+   --text-muted:     #6E6E6E (Subtle Utility Caption)
+   --border:         rgba(255, 255, 255, 0.14) (Restrained Hairline)
+   --border-subtle:  rgba(255, 255, 255, 0.08)
+   --accent:         #C5A880 (Warm Automotive Bronze / Titanium)
+   --accent-hover:   #D8BD97
+   --accent-dark:    #8F734E
 ========================================================= */
 
 @theme {
-  --color-bg: #F3F1EC;
-  --color-bg-secondary: #EAE7E0;
-  --color-surface: #FFFFFF;
-  --color-text-primary: #111111;
-  --color-text-secondary: #707070;
-  --color-text-muted: #999999;
-  --color-black: #000000;
-  --color-accent: #651F2A;
-  --color-accent-dark: #4A141E;
-  --color-accent-light: #8B3A47;
-  --color-border: #D8D5CF;
-  --color-border-dark: #111111;
-  --color-neutral-subtle: #D8D5CF;
+  --color-bg: #0B0B0B;
+  --color-bg-secondary: #141414;
+  --color-surface: #1B1B1B;
+  --color-surface-hover: #242424;
+  --color-text-primary: #F4F2ED;
+  --color-text-secondary: #9B9B9B;
+  --color-text-muted: #6E6E6E;
+  --color-border: rgba(255, 255, 255, 0.14);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-accent: #C5A880;
+  --color-accent-hover: #D8BD97;
+  --color-accent-dark: #8F734E;
 }
 
 /* =========================================================
@@ -43,9 +45,9 @@
 
   html {
     scroll-behavior: smooth;
-    background: #F3F1EC;
-    color: #111111;
-    color-scheme: light;
+    background: #0B0B0B;
+    color: #F4F2ED;
+    color-scheme: dark;
   }
 
   body {
@@ -53,9 +55,9 @@
     min-width: 320px;
     min-height: 100vh;
     overflow-x: hidden;
-    background-color: #F3F1EC;
-    color: #111111;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #0B0B0B;
+    color: #F4F2ED;
+    font-family: "Inter", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -65,6 +67,8 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    background-color: #0B0B0B;
+    color: #F4F2ED;
   }
 
   button,
@@ -90,20 +94,25 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Space Grotesk", "Outfit", sans-serif;
+    font-family: "Manrope", "Inter", sans-serif;
     font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    color: #111111;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: #F4F2ED;
   }
 }
 
 /* =========================================================
-   EDITORIAL TYPOGRAPHY CLASSES
+   TYPOGRAPHIC UTILITIES
 ========================================================= */
-.font-editorial {
-  font-family: "Space Grotesk", "Outfit", sans-serif;
+.font-display {
+  font-family: "Manrope", "Inter", sans-serif;
   letter-spacing: -0.03em;
+}
+
+.font-editorial {
+  font-family: "Manrope", "Inter", sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .font-body {
@@ -112,264 +121,245 @@
 
 .font-mono {
   font-family: "JetBrains Mono", monospace;
-  letter-spacing: -0.01em;
 }
 
-.tracking-editorial-wide {
-  letter-spacing: 0.18em;
-}
-
-.tracking-editorial-tight {
-  letter-spacing: -0.04em;
+/* Subtle Automotive Section Paddings */
+.section-padding {
+  padding-left: clamp(1.25rem, 5vw, 4.5rem);
+  padding-right: clamp(1.25rem, 5vw, 4.5rem);
 }
 
 /* =========================================================
-   SCROLLBAR
+   BUTTON STYLES (PREMIUM AUTOMOTIVE CLUB)
 ========================================================= */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+.btn-club-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background-color: #F4F2ED;
+  color: #0B0B0B;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.8rem;
+  border-radius: 0px;
+  border: 1px solid #F4F2ED;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  cursor: pointer;
 }
 
-::-webkit-scrollbar-track {
-  background: #F3F1EC;
+.btn-club-primary:hover {
+  background-color: #C5A880;
+  border-color: #C5A880;
+  color: #0B0B0B;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #D8D5CF;
-  border-radius: 2px;
+.btn-club-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background-color: transparent;
+  color: #F4F2ED;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.8rem;
+  border-radius: 0px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  cursor: pointer;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #651F2A;
+.btn-club-outline:hover {
+  border-color: #F4F2ED;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #F4F2ED;
 }
 
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-/* =========================================================
-   EDITORIAL CARDS & SURFACES
-========================================================= */
-.editorial-border {
-  border-color: #D8D5CF;
-}
-
-.editorial-divider {
-  height: 1px;
-  background-color: #D8D5CF;
-  width: 100%;
-}
-
-.editorial-card {
-  background: #FFFFFF;
-  border: 1px solid #D8D5CF;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.editorial-card:hover {
-  border-color: #111111;
-  box-shadow: 0 16px 36px rgba(17, 17, 17, 0.05);
-}
-
-/* Backward compatibility */
-.premium-card {
-  background: #FFFFFF;
-  border: 1px solid #D8D5CF;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.premium-card:hover {
-  border-color: #111111;
-  box-shadow: 0 12px 32px rgba(17, 17, 17, 0.05);
-}
-.premium-card-muted {
-  background: #EAE7E0;
-  border: 1px solid #D8D5CF;
-}
-.luxury-card { composes: premium-card; }
-.swiss-card { composes: premium-card; }
-
-/* =========================================================
-   EDITORIAL BUTTONS
-========================================================= */
+/* Backward compatibility for previous button classes */
 .btn-editorial-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: #111111;
-  color: #FFFFFF;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 500;
-  padding: 14px 28px;
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
+  gap: 0.6rem;
+  background-color: #F4F2ED;
+  color: #0B0B0B;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  padding: 0.95rem 1.8rem;
+  border-radius: 0px;
+  border: 1px solid #F4F2ED;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
 }
 
 .btn-editorial-primary:hover {
-  background: #651F2A;
-  color: #FFFFFF;
-  transform: translateY(-1px);
+  background-color: #C5A880;
+  border-color: #C5A880;
+  color: #0B0B0B;
 }
 
 .btn-editorial-outline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: transparent;
-  border: 1px solid #111111;
-  color: #111111;
-  font-family: "Space Grotesk", sans-serif;
+  gap: 0.6rem;
+  background-color: transparent;
+  color: #F4F2ED;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
   font-weight: 500;
-  padding: 13px 26px;
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  padding: 0.95rem 1.8rem;
+  border-radius: 0px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
 }
 
 .btn-editorial-outline:hover {
-  background: #111111;
-  color: #FFFFFF;
-}
-
-.btn-primary { composes: btn-editorial-primary; }
-.btn-secondary { composes: btn-editorial-primary; }
-.btn-outline { composes: btn-editorial-outline; }
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: transparent;
-  color: #707070;
-  font-family: "Space Grotesk", sans-serif;
-  padding: 8px 16px;
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  transition: color 0.2s ease;
-}
-.btn-ghost:hover {
-  color: #111111;
+  border-color: #F4F2ED;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #F4F2ED;
 }
 
 /* =========================================================
-   EDITORIAL INPUTS
+   INPUTS & FORMS
 ========================================================= */
-.premium-input,
+.club-input {
+  width: 100%;
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #F4F2ED;
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 0px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.club-input:focus {
+  border-color: #C5A880;
+  background: #1B1B1B;
+}
+
+.club-input::placeholder {
+  color: #6E6E6E;
+  font-size: 0.82rem;
+}
+
 .editorial-input {
   width: 100%;
-  background: #FFFFFF;
-  border: 1px solid #D8D5CF;
-  padding: 12px 16px;
-  color: #111111;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.premium-input:hover,
-.editorial-input:hover {
-  border-color: #707070;
-}
-
-.premium-input:focus,
-.editorial-input:focus {
-  border-color: #111111;
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #F4F2ED;
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 0px;
   outline: none;
-  box-shadow: 0 0 0 1px #111111;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.premium-input::placeholder,
-.editorial-input::placeholder {
-  color: #999999;
+.editorial-input:focus {
+  border-color: #C5A880;
+  background: #1B1B1B;
 }
 
 /* =========================================================
-   CUSTOM CURSOR (DESKTOP ONLY)
+   SURFACES & CARDS
+========================================================= */
+.club-card {
+  background-color: #1B1B1B;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.club-card:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hairline-b {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.hairline-t {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.hairline-r {
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.hairline-l {
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* =========================================================
+   SCROLLBAR (DARK REFINED AUTOMOTIVE)
+========================================================= */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0B0B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #242424;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #383838;
+}
+
+/* =========================================================
+   CUSTOM CURSOR (TACTILE AUTOMOTIVE)
 ========================================================= */
 @media (hover: hover) and (pointer: fine) {
-  body.has-custom-cursor,
-  body.has-custom-cursor a,
-  body.has-custom-cursor button {
-    cursor: none !important;
+  body.custom-cursor-enabled {
+    cursor: default;
   }
 }
 
-.cursor-follower {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 0.25s ease,
-              border-color 0.25s ease,
-              transform 0.08s linear;
-}
-
-/* =========================================================
-   FOCUS & SELECTION
-========================================================= */
-*:focus-visible {
-  outline: 1px solid #111111;
-  outline-offset: 2px;
-}
-
-::selection {
-  background: #651F2A;
-  color: #FFFFFF;
-}
-
-/* =========================================================
-   SECTION PADDING
-========================================================= */
-.section-padding {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .section-padding {
-    padding-left: 3.5rem;
-    padding-right: 3.5rem;
+/* Touch devices suppress custom cursor */
+@media (hover: none) or (pointer: coarse) {
+  .custom-cursor {
+    display: none !important;
   }
 }
 
-@media (min-width: 1280px) {
-  .section-padding {
-    padding-left: 5rem;
-    padding-right: 5rem;
-  }
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Skeleton shimmer */
-.skeleton {
-  background: linear-gradient(90deg, #EAE7E0 25%, #DDD9D0 50%, #EAE7E0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+.animate-slide-up {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

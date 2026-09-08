@@ -78,16 +78,18 @@ const Navbar = ({ onOpenSearch }) => {
 
   const navItems = [
     { name: 'FLEET', path: '/cars' },
-    { name: 'LOCATIONS', path: '/#locations' },
     { name: 'EXPERIENCE', path: '/#experience' },
+    { name: 'LOCATIONS', path: '/#locations' },
     { name: 'OFFERS', path: '/#offers' },
   ];
 
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 border-b border-[#D8D5CF] ${
-          scrolled ? 'bg-[#F3F1EC]/95 backdrop-blur-md py-3.5 shadow-xs' : 'bg-[#F3F1EC] py-4'
+        className={`sticky top-0 z-50 w-full transition-all duration-300 border-b ${
+          scrolled
+            ? 'bg-[#0B0B0B]/92 backdrop-blur-md py-3.5 border-white/14 shadow-lg shadow-black/40'
+            : 'bg-[#0B0B0B] py-4 border-white/10'
         }`}
       >
         <div className="max-w-[1440px] mx-auto flex items-center justify-between section-padding">
@@ -97,148 +99,140 @@ const Navbar = ({ onOpenSearch }) => {
             to="/"
             data-cursor="explore"
             data-cursor-text="HOME"
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2.5 group select-none"
           >
-            <span className="w-2.5 h-2.5 bg-[#651F2A] rounded-none group-hover:rotate-45 transition-transform duration-300" />
-            <span className="text-base sm:text-lg font-editorial font-bold tracking-tight uppercase text-[#111111]">
+            <span className="w-2 h-2 rounded-full bg-[#C5A880] transition-transform group-hover:scale-125" />
+            <span className="text-sm sm:text-base font-display font-extrabold tracking-widest uppercase text-[#F4F2ED]">
               CAR RENTAL
             </span>
           </Link>
 
-          {/* Desktop Minimal Nav */}
-          <nav className="hidden lg:flex items-center gap-8" aria-label="Main navigation">
-            {navItems.map((item) => {
-              const isHash = item.path.includes('#');
-              return isHash ? (
-                <a
-                  key={item.name}
-                  href={item.path}
-                  className="text-xs font-mono tracking-widest text-[#707070] hover:text-[#111111] transition-colors uppercase"
-                >
-                  {item.name}
-                </a>
-              ) : (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`text-xs font-mono tracking-widest transition-colors uppercase ${
-                    location.pathname === item.path
-                      ? 'text-[#651F2A] font-bold'
-                      : 'text-[#707070] hover:text-[#111111]'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              );
-            })}
+          {/* Desktop Center/Right Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="text-xs font-mono tracking-widest text-[#9B9B9B] hover:text-[#F4F2ED] transition-colors uppercase font-medium relative group"
+              >
+                <span>{item.name}</span>
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#C5A880] transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
           </nav>
 
-          {/* Desktop Utilities & Actions */}
-          <div className="hidden lg:flex items-center gap-4">
-            
-            {/* Search Trigger */}
-            <button
-              onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 border border-[#D8D5CF] hover:border-[#111111] text-[11px] font-mono tracking-widest text-[#707070] hover:text-[#111111] transition-all cursor-pointer"
-              title="Search Fleet (⌘K)"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>SEARCH</span>
-            </button>
+          {/* Right Actions: Search + Wishlist + Book Now + Profile */}
+          <div className="hidden md:flex items-center gap-4 lg:gap-6">
+            {/* Search Overlay Trigger */}
+            {onOpenSearch && (
+              <button
+                onClick={onOpenSearch}
+                data-cursor="explore"
+                data-cursor-text="SEARCH"
+                className="flex items-center gap-2 text-xs font-mono text-[#9B9B9B] hover:text-[#F4F2ED] tracking-wider uppercase transition-colors"
+                title="Search fleet (⌘K)"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline text-[10px] text-[#6E6E6E] border border-white/14 px-1.5 py-0.5">
+                  ⌘K
+                </span>
+              </button>
+            )}
 
             {/* Saved Wishlist */}
-            <button
-              onClick={() => navigate('/wishlist')}
-              className="relative p-2 text-[#707070] hover:text-[#111111] transition-colors cursor-pointer"
-              title={`Saved Vehicles (${favorites.length})`}
+            <Link
+              to="/wishlist"
+              className="relative text-[#9B9B9B] hover:text-[#F4F2ED] transition-colors p-1"
+              title="Saved Vehicles"
             >
-              <Heart className={`w-4 h-4 ${favorites.length > 0 ? 'fill-[#651F2A] text-[#651F2A]' : ''}`} />
-              {favorites.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#651F2A] text-white text-[9px] font-mono font-bold rounded-full flex items-center justify-center">
+              <Heart className="w-4 h-4" />
+              {favorites && favorites.length > 0 && (
+                <span className="absolute -top-1 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#C5A880] text-[#0B0B0B] text-[8px] font-mono font-bold flex items-center justify-center">
                   {favorites.length}
                 </span>
               )}
-            </button>
-
-            {/* My Bookings */}
-            <Link
-              to="/my-bookings"
-              className="text-xs font-mono tracking-widest text-[#707070] hover:text-[#111111] uppercase transition-colors"
-            >
-              JOURNEYS
             </Link>
 
-            {/* Host / Owner Dashboard */}
-            <button
-              onClick={() => (isOwner ? navigate('/owner') : changeRole())}
-              className="text-xs font-mono tracking-widest text-[#707070] hover:text-[#111111] uppercase transition-colors cursor-pointer"
+            {/* Book Now Primary Button */}
+            <Link
+              to="/cars"
+              data-cursor="book"
+              data-cursor-text="FLEET"
+              className="btn-club-primary py-2 px-4.5 text-[11px]"
             >
-              {isOwner ? 'DASHBOARD' : 'HOST VEHICLE'}
-            </button>
+              <span>BOOK NOW</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
 
-            {/* User Auth or Profile */}
+            {/* Profile / Auth Dropdown */}
             {user ? (
-              <div ref={userMenuRef} className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 pl-3 border-l border-[#D8D5CF] cursor-pointer"
+                  className="flex items-center gap-2 py-1.5 px-3 border border-white/14 hover:border-white/30 text-xs font-mono tracking-wider text-[#F4F2ED] bg-[#141414] transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-none bg-[#111111] text-white flex items-center justify-center text-xs font-mono font-bold uppercase">
-                    {user.name ? user.name[0] : 'U'}
-                  </div>
-                  <span className="text-xs font-mono uppercase text-[#111111] font-medium hidden xl:inline">
-                    {user.name?.split(' ')[0]}
+                  <UserIcon className="w-3.5 h-3.5 text-[#C5A880]" />
+                  <span className="max-w-[100px] truncate uppercase font-semibold">
+                    {user.name?.split(' ')[0] || 'PROFILE'}
                   </span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-[#707070] transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className="w-3 h-3 text-[#9B9B9B]" />
                 </button>
 
                 <AnimatePresence>
                   {userMenuOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: 6 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 6 }}
-                      className="absolute right-0 mt-3 w-56 bg-white border border-[#111111] shadow-xl p-3 z-50 flex flex-col gap-1 font-mono text-xs"
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-56 bg-[#141414] border border-white/14 shadow-2xl p-2 z-50 text-xs font-mono"
                     >
-                      <div className="p-2 border-b border-[#D8D5CF] mb-1">
-                        <span className="text-[10px] text-[#707070] uppercase block">SIGNED IN AS</span>
-                        <span className="font-bold text-[#111111] block truncate">{user.name}</span>
-                        <span className="text-[10px] text-[#707070] truncate block">{user.email}</span>
+                      <div className="px-3 py-2 border-b border-white/10 mb-1">
+                        <span className="text-[10px] text-[#9B9B9B] uppercase block">
+                          AUTHENTICATED AS
+                        </span>
+                        <span className="text-white font-bold truncate block">
+                          {user.email}
+                        </span>
                       </div>
 
-                      {isOwner && (
-                        <button
-                          onClick={() => navigate('/owner')}
-                          className="w-full text-left p-2 hover:bg-[#F3F1EC] transition-colors flex items-center gap-2"
-                        >
-                          <LayoutDashboard className="w-3.5 h-3.5" />
-                          <span>FLEET DASHBOARD</span>
-                        </button>
-                      )}
+                      <Link
+                        to="/my-bookings"
+                        className="flex items-center gap-2.5 px-3 py-2 text-[#9B9B9B] hover:text-[#F4F2ED] hover:bg-[#1B1B1B] transition-colors"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5" />
+                        <span>MY JOURNEYS</span>
+                      </Link>
+
+                      <Link
+                        to="/wishlist"
+                        className="flex items-center gap-2.5 px-3 py-2 text-[#9B9B9B] hover:text-[#F4F2ED] hover:bg-[#1B1B1B] transition-colors"
+                      >
+                        <Heart className="w-3.5 h-3.5" />
+                        <span>SAVED VEHICLES</span>
+                      </Link>
 
                       <button
-                        onClick={() => navigate('/my-bookings')}
-                        className="w-full text-left p-2 hover:bg-[#F3F1EC] transition-colors"
+                        onClick={changeRole}
+                        className="w-full text-left flex items-center gap-2.5 px-3 py-2 text-[#9B9B9B] hover:text-[#F4F2ED] hover:bg-[#1B1B1B] transition-colors"
                       >
-                        MY RESERVATIONS
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880]" />
+                        <span>{isOwner ? 'HOST DASHBOARD' : 'BECOME A HOST'}</span>
                       </button>
+
+                      <div className="border-t border-white/10 my-1" />
 
                       <button
-                        onClick={() => navigate('/wishlist')}
-                        className="w-full text-left p-2 hover:bg-[#F3F1EC] transition-colors"
+                        onClick={() => {
+                          logout();
+                          setUserMenuOpen(false);
+                          toast.success('Signed out successfully');
+                        }}
+                        className="w-full text-left flex items-center gap-2.5 px-3 py-2 text-[#9B9B9B] hover:text-red-400 hover:bg-[#1B1B1B] transition-colors"
                       >
-                        SAVED VEHICLES
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>SIGN OUT</span>
                       </button>
-
-                      <div className="border-t border-[#D8D5CF] pt-1 mt-1">
-                        <button
-                          onClick={() => { setUserMenuOpen(false); logout(); }}
-                          className="w-full text-left p-2 text-[#651F2A] hover:bg-rose-50 transition-colors flex items-center gap-2 font-bold"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          <span>SIGN OUT</span>
-                        </button>
-                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -246,35 +240,25 @@ const Navbar = ({ onOpenSearch }) => {
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="px-4 py-2 border border-[#111111] text-xs font-mono tracking-widest text-[#111111] hover:bg-[#111111] hover:text-white uppercase transition-all cursor-pointer"
+                className="text-xs font-mono tracking-widest text-[#F4F2ED] hover:text-[#C5A880] uppercase font-bold transition-colors cursor-pointer"
               >
-                SIGN IN
+                PROFILE
               </button>
             )}
-
-            {/* Quick Book CTA */}
-            <Link
-              to="/cars"
-              data-cursor="book"
-              data-cursor-text="FLEET"
-              className="px-4 py-2 bg-[#111111] hover:bg-[#651F2A] text-white text-xs font-mono tracking-widest uppercase transition-colors"
-            >
-              BOOK A CAR
-            </Link>
           </div>
 
-          {/* Mobile Hamburger Trigger */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <button
-              onClick={onOpenSearch}
-              className="p-2 border border-[#D8D5CF] text-[#111111]"
-              aria-label="Open search"
+          {/* Mobile Right Controls: Book + Hamburger */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link
+              to="/cars"
+              className="px-3 py-1.5 bg-[#F4F2ED] text-[#0B0B0B] text-[10px] font-mono tracking-widest uppercase font-bold"
             >
-              <Search className="w-4 h-4" />
-            </button>
+              BOOK
+            </Link>
+
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 border border-[#D8D5CF] text-[#111111]"
+              className="p-1.5 text-[#F4F2ED] border border-white/14"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -283,102 +267,85 @@ const Navbar = ({ onOpenSearch }) => {
         </div>
       </header>
 
-      {/* Full-screen Editorial Mobile Menu */}
+      {/* Full-Screen Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[60] bg-[#F3F1EC] text-[#111111] flex flex-col justify-between p-6 sm:p-10 lg:hidden overflow-y-auto"
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 top-[61px] z-40 bg-[#0B0B0B] border-t border-white/14 flex flex-col justify-between p-6 sm:p-8 md:hidden overflow-y-auto"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#D8D5CF] pb-6">
-              <span className="text-xs font-mono tracking-widest text-[#707070] uppercase">
-                01 / NAVIGATION ARCHIVE
+            <div className="space-y-6 pt-4">
+              <span className="text-[10px] font-mono tracking-widest text-[#9B9B9B] uppercase block">
+                NAVIGATION // 2026
               </span>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="p-2 border border-[#D8D5CF]"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {/* Oversized Mobile Links */}
-            <nav className="flex flex-col gap-6 py-12">
-              {[
-                { name: 'SELECTED FLEET', path: '/cars' },
-                { name: 'JOURNEYS & BOOKINGS', path: '/my-bookings' },
-                { name: 'SAVED ARCHIVE', path: '/wishlist' },
-                { name: 'METROPOLITAN HUBS', path: '/#locations' },
-              ].map((item, idx) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-baseline gap-4 group"
-                >
-                  <span className="text-xs font-mono text-[#707070]">0{idx + 1}</span>
-                  <span className="text-3xl sm:text-4xl font-editorial font-bold tracking-tight uppercase group-hover:text-[#651F2A] transition-colors">
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
+              <div className="flex flex-col space-y-4">
+                {navItems.map((item, index) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between py-3 border-b border-white/10 text-2xl font-display font-bold uppercase text-[#F4F2ED]"
+                  >
+                    <span>{item.name}</span>
+                    <span className="text-xs font-mono text-[#9B9B9B]">0{index + 1}</span>
+                  </Link>
+                ))}
+              </div>
 
-              {isOwner ? (
-                <Link
-                  to="/owner"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-baseline gap-4 group pt-4 border-t border-[#D8D5CF]"
-                >
-                  <span className="text-xs font-mono text-[#707070]">05</span>
-                  <span className="text-2xl font-editorial font-bold uppercase text-[#651F2A]">
-                    OWNER DASHBOARD
-                  </span>
-                </Link>
-              ) : (
+              {onOpenSearch && (
                 <button
-                  onClick={() => { setMobileOpen(false); changeRole(); }}
-                  className="flex items-baseline gap-4 group pt-4 border-t border-[#D8D5CF] text-left cursor-pointer"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenSearch();
+                  }}
+                  className="w-full py-3.5 border border-white/14 flex items-center justify-center gap-3 text-xs font-mono tracking-widest uppercase text-[#F4F2ED] bg-[#141414]"
                 >
-                  <span className="text-xs font-mono text-[#707070]">05</span>
-                  <span className="text-2xl font-editorial font-bold uppercase text-[#111111] group-hover:text-[#651F2A]">
-                    HOST VEHICLE
-                  </span>
+                  <Search className="w-4 h-4" />
+                  <span>SEARCH ARCHIVE (⌘K)</span>
                 </button>
               )}
-            </nav>
+            </div>
 
-            {/* Mobile Footer Auth & Actions */}
-            <div className="border-t border-[#D8D5CF] pt-6 flex flex-col gap-3">
+            <div className="pt-8 border-t border-white/14 space-y-3">
               {user ? (
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span>SIGNED IN: <strong className="uppercase">{user.name}</strong></span>
+                <div className="space-y-2">
+                  <Link
+                    to="/my-bookings"
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full py-3 bg-[#1B1B1B] text-[#F4F2ED] text-xs font-mono tracking-widest uppercase font-bold flex items-center justify-center gap-2 border border-white/14"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>MY JOURNEYS</span>
+                  </Link>
                   <button
-                    onClick={() => { setMobileOpen(false); logout(); }}
-                    className="text-[#651F2A] font-bold"
+                    onClick={() => {
+                      logout();
+                      setMobileOpen(false);
+                    }}
+                    className="w-full py-2.5 text-xs font-mono text-red-400 tracking-widest uppercase"
                   >
                     SIGN OUT
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={() => { setMobileOpen(false); setShowLogin(true); }}
-                  className="w-full py-4 bg-white border border-[#111111] text-xs font-mono tracking-widest uppercase font-bold"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setShowLogin(true);
+                  }}
+                  className="w-full py-3.5 bg-[#F4F2ED] text-[#0B0B0B] text-xs font-mono tracking-widest uppercase font-bold"
                 >
-                  SIGN IN TO ACCOUNT
+                  PROFILE / SIGN IN
                 </button>
               )}
 
-              <Link
-                to="/cars"
-                onClick={() => setMobileOpen(false)}
-                className="w-full py-4 bg-[#111111] text-white text-xs font-mono tracking-widest uppercase font-bold flex items-center justify-center gap-2"
-              >
-                <span>EXPLORE ENTIRE FLEET</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <div className="text-[10px] font-mono text-[#9B9B9B] uppercase text-center pt-2">
+                CAR RENTAL — ALL RIGHTS RESERVED © 2026
+              </div>
             </div>
           </motion.div>
         )}

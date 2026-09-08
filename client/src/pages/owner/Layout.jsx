@@ -14,11 +14,11 @@ const Layout = () => {
   }, [isOwner, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#FAF9F7' }}>
+    <div className="min-h-screen flex flex-col overflow-hidden bg-[#0B0B0B] text-[#F4F2ED]">
       <NavbarOwner />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 w-full overflow-y-auto scrollbar-none p-6 md:p-10 pb-16">
+        <main className="flex-1 w-full overflow-y-auto scrollbar-none p-6 md:p-10 pb-16 bg-[#0B0B0B]">
           <Outlet />
         </main>
       </div>

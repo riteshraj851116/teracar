@@ -1,114 +1,129 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Sparkles, Compass, Clock } from 'lucide-react';
+import { ShieldCheck, Clock, Award, Compass, Headset, ArrowRight } from 'lucide-react';
 
-const CHAPTERS = [
+const PILLARS = [
   {
     number: '01',
-    word: 'DRIVE',
-    title: 'THE PURSUIT OF MOTION',
-    text: 'We curate machines that redefine mechanical engagement. Direct steering racks, twin-turbocharged powerbands, and active aerodynamics made accessible on your timeline.',
-    metric: '630+ HP PEAK RATED',
+    title: 'PREMIUM VEHICLES',
+    desc: 'Each specimen in our registry is maintained to factory concours standards. Low mileage, immaculate interiors, and high-performance provenance.',
+    icon: Award,
   },
   {
     number: '02',
-    word: 'DISCOVER',
-    title: 'UNRESTRICTED HIGHWAYS',
-    text: 'Every vehicle delivery is pre-mapped and GPS-synchronized. From early morning mountain passes to late-night cross-country journeys with comprehensive zero-liability coverage.',
-    metric: 'UNLIMITED MILEAGE OPTIONS',
+    title: 'FLEXIBLE RENTALS',
+    desc: 'Daily, weekend, and extended continental leases with transparent daily allocations and zero restrictive corporate lease contracts.',
+    icon: Clock,
   },
   {
     number: '03',
-    word: 'ESCAPE',
-    title: 'THE CONCIERGE PROMISE',
-    text: 'Tarmac-side handover at private aviation terminals or discreet white-glove arrival at your residence. Fully fueled, sanitized, and detailed to concours standards.',
-    metric: '100% WHITE-GLOVE DISPATCH',
+    title: 'PROFESSIONAL SUPPORT',
+    desc: 'Dedicated 24/7 concierge liaison and roadside technical support team assigned to your journey from ignition to return.',
+    icon: Headset,
   },
   {
     number: '04',
-    word: 'ARRIVE',
-    title: 'TIMELESS DISTINCTION',
-    text: 'Whether commanding the room in a long-wheelbase flagship or setting the pace in a mid-engine track weapon, arrive with unmistakable poise and precision.',
-    metric: 'ALL-INCLUSIVE TRANSPARENT TARIFFS',
+    title: 'EASY PICKUP',
+    desc: 'Curbside handover at private FBO airport terminals, five-star residences, or our private metropolitan club showrooms.',
+    icon: Compass,
+  },
+  {
+    number: '05',
+    title: 'RELIABLE SERVICE',
+    desc: 'Zero waiting queues, verified electronic handovers, full fuel reserves, and zero-liability comprehensive insurance protection.',
+    icon: ShieldCheck,
   },
 ];
 
 const StorytellingSection = () => {
   return (
-    <section className="py-28 bg-[#111111] text-[#F3F1EC] relative overflow-hidden">
+    <section id="experience" className="py-28 bg-[#0B0B0B] text-[#F4F2ED] relative overflow-hidden border-b border-white/14 select-none">
       <div className="max-w-[1440px] mx-auto section-padding">
         
-        {/* Section Lead */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-16 border-b border-white/10">
-          <div>
-            <span className="text-xs font-mono tracking-widest text-[#D8D5CF]/70 uppercase block mb-3">
-              05 / CHRONICLE
-            </span>
-            <h2 className="text-4xl sm:text-7xl font-editorial font-bold tracking-tight uppercase text-white">
-              THE JOURNEY<br />ARCHIVE.
+        {/* Top Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <span className="w-2 h-2 rounded-full bg-[#C5A880]" />
+          <span className="text-xs font-mono tracking-widest text-[#C5A880] uppercase font-bold">
+            03 // EXPERIENCE
+          </span>
+        </div>
+
+        {/* 25 — Large Headline: THE CAR IS ONLY THE BEGINNING */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-white/14 items-end">
+          <div className="lg:col-span-8">
+            <h2 className="text-5xl sm:text-7xl lg:text-8xl font-display font-extrabold tracking-tight uppercase leading-[0.94] text-[#F4F2ED]">
+              THE CAR<br />
+              IS ONLY<br />
+              <span className="text-[#C5A880]">THE BEGINNING.</span>
             </h2>
           </div>
-          <div className="max-w-sm">
-            <p className="text-xs font-mono uppercase tracking-widest text-white/60 leading-relaxed">
-              Automotive rental elevated into high-end curated travel. Four pillars governing our entire fleet philosophy.
+
+          <div className="lg:col-span-4 space-y-4">
+            <p className="text-sm sm:text-base font-body text-[#9B9B9B] leading-relaxed">
+              We approach automotive mobility as a high-discipline hospitality craft. Behind every ignition key is a frictionless ecosystem engineered around your time, privacy, and driving pleasure.
             </p>
-          </div>
-        </div>
-
-        {/* Chapters Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10 pt-10">
-          {CHAPTERS.map((ch) => (
-            <div
-              key={ch.number}
-              className="py-8 md:py-0 md:px-8 first:pl-0 last:pr-0 flex flex-col justify-between min-h-[360px] group"
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs font-mono text-white/40 mb-6">
-                  <span>SECTION {ch.number}</span>
-                  <span className="group-hover:text-[#651F2A] transition-colors">↗</span>
-                </div>
-
-                {/* Oversized Typographic Word */}
-                <h3 className="text-4xl sm:text-5xl lg:text-6xl font-editorial font-bold tracking-tighter uppercase text-white/20 group-hover:text-white transition-colors duration-500 mb-6">
-                  {ch.word}
-                </h3>
-
-                <h4 className="text-sm font-editorial font-bold uppercase tracking-wider text-white mb-2">
-                  {ch.title}
-                </h4>
-
-                <p className="text-xs font-body text-white/60 leading-relaxed">
-                  {ch.text}
-                </p>
-              </div>
-
-              <div className="pt-8 border-t border-white/10 mt-8">
-                <span className="text-[10px] font-mono tracking-widest text-[#D8D5CF]/60 uppercase block">
-                  {ch.metric}
-                </span>
-              </div>
+            <div className="pt-2">
+              <Link
+                to="/cars"
+                className="inline-flex items-center gap-2 text-xs font-mono tracking-widest uppercase text-[#F4F2ED] hover:text-[#C5A880] transition-colors"
+              >
+                <span>EXPLORE MEMBERSHIP FLEET</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Storytelling Bottom Callout */}
-        <div className="mt-20 pt-12 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#651F2A] animate-ping" />
-            <span className="text-xs font-mono tracking-widest uppercase text-white/80">
-              DISPATCH ACTIVE ACROSS 6 AIRPORTS TODAY
-            </span>
+        {/* Large Visual + 5 Pillars Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-16 items-center">
+          
+          {/* Large Cinematic Automotive Image */}
+          <div className="lg:col-span-5 relative aspect-4/5 overflow-hidden bg-[#141414] border border-white/14">
+            <img
+              src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?q=80&w=1200&auto=format&fit=crop"
+              alt="Automotive Club Experience"
+              className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.1]"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-[#0B0B0B] via-transparent to-transparent opacity-80" />
+            
+            <div className="absolute bottom-6 left-6 right-6 p-4 bg-[#141414]/90 backdrop-blur-md border border-white/14">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-[#C5A880] block mb-1">
+                STANDARDS // 2026
+              </span>
+              <p className="text-xs font-mono text-[#F4F2ED] uppercase font-bold">
+                100% FACTORY SPECIFICATION INSPECTED
+              </p>
+            </div>
           </div>
 
-          <Link
-            to="/cars"
-            data-cursor="book"
-            data-cursor-text="START"
-            className="inline-flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-[#651F2A] text-[#111111] hover:text-white text-xs font-mono tracking-widest uppercase font-bold transition-all shadow-md"
-          >
-            <span>RESERVE YOUR ALLOCATION</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          {/* 5 Pillars List */}
+          <div className="lg:col-span-7 flex flex-col divide-y divide-white/10">
+            {PILLARS.map((pillar) => {
+              const Icon = pillar.icon;
+              return (
+                <div
+                  key={pillar.number}
+                  className="py-6 sm:py-7 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 group transition-colors hover:bg-[#141414]/40 sm:px-4"
+                >
+                  <span className="text-xs font-mono text-[#6E6E6E] group-hover:text-[#C5A880] transition-colors">
+                    {pillar.number}
+                  </span>
+
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 text-[#C5A880]" />
+                      <h3 className="text-base sm:text-lg font-display font-bold uppercase tracking-wider text-[#F4F2ED]">
+                        {pillar.title}
+                      </h3>
+                    </div>
+                    <p className="text-xs sm:text-sm font-body text-[#9B9B9B] leading-relaxed pt-1">
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

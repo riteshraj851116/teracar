@@ -3,68 +3,63 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="bg-[#111111] text-[#F3F1EC] pt-24 pb-12 border-t border-[#D8D5CF]/20" aria-label="Site footer">
+    <footer className="bg-[#0B0B0B] text-[#F4F2ED] pt-24 pb-12 border-t border-white/14 select-none" aria-label="Site footer">
       <div className="max-w-[1440px] mx-auto section-padding">
         
-        {/* Massive Editorial CTA */}
-        <div className="pb-20 border-b border-white/10 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10">
+        {/* 29 — Main Large Text & CTA */}
+        <div className="pb-20 border-b border-white/14 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10">
           <div>
-            <span className="text-xs font-mono tracking-widest text-white/50 uppercase block mb-4">
-              07 / CONCLUSION
+            <span className="text-xs font-mono tracking-widest text-[#C5A880] uppercase block mb-4 font-bold">
+              06 // INITIATE JOURNEY
             </span>
-            <h2 className="text-5xl sm:text-7xl lg:text-9xl font-editorial font-bold tracking-tighter uppercase leading-[0.88] text-white">
-              READY TO<br />
-              <span className="text-white/40 hover:text-[#651F2A] transition-colors duration-500">MOVE?</span>
+            <h2 className="text-6xl sm:text-8xl lg:text-9xl font-display font-extrabold tracking-tight uppercase leading-[0.88] text-[#F4F2ED]">
+              READY<br />
+              <span className="text-[#C5A880]">TO MOVE?</span>
             </h2>
           </div>
 
-          <div className="flex flex-col items-start gap-4">
-            <p className="text-xs font-mono text-white/60 uppercase tracking-widest max-w-xs leading-relaxed">
-              Available 24/7 across primary metropolitan hubs. Instant confirmation and direct airfield dispatch.
+          <div className="flex flex-col items-start gap-5">
+            <p className="text-xs font-mono text-[#9B9B9B] uppercase tracking-widest max-w-xs leading-relaxed">
+              Available 24/7 across primary metropolitan hubs. Direct airport concierge and zero administrative waiting.
             </p>
             <Link
               to="/cars"
               data-cursor="book"
               data-cursor-text="BOOK"
-              className="px-8 py-5 bg-[#651F2A] hover:bg-white hover:text-[#111111] text-white text-xs font-mono tracking-widest uppercase font-bold flex items-center gap-4 transition-all duration-300 shadow-xl"
+              className="btn-club-primary py-4 px-8 text-xs font-bold"
             >
-              <span>BOOK A CAR</span>
+              <span>BOOK YOUR CAR</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
 
-        {/* Editorial Navigation Columns */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 py-16 border-b border-white/10 text-xs font-mono">
-          
-          {/* Col 1 */}
+        {/* 29 — Links: FLEET, LOCATIONS, OFFERS, ABOUT, CONTACT */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 py-16 border-b border-white/14 text-xs font-mono">
           <div>
-            <span className="text-white/40 uppercase tracking-widest block mb-4">
-              FLEET DIRECTORY
+            <span className="text-[#6E6E6E] uppercase tracking-widest block mb-4">
+              FLEET
             </span>
             <ul className="space-y-3 uppercase tracking-wider">
-              {['Supercars', 'Luxury Saloons', 'Flagship SUVs', 'Track Heritage', 'Electric GT'].map((cat) => (
-                <li key={cat}>
-                  <Link to="/cars" className="text-white/70 hover:text-white transition-colors">
-                    {cat}
+              {['Supercars', 'Luxury Saloons', 'Flagship SUVs', 'Grand Tourers', 'Electric Performance'].map((item) => (
+                <li key={item}>
+                  <Link to="/cars" className="text-[#9B9B9B] hover:text-[#F4F2ED] transition-colors">
+                    {item}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Col 2 */}
           <div>
-            <span className="text-white/40 uppercase tracking-widest block mb-4">
-              METROPOLITAN HUBS
+            <span className="text-[#6E6E6E] uppercase tracking-widest block mb-4">
+              LOCATIONS
             </span>
             <ul className="space-y-3 uppercase tracking-wider">
-              {['Delhi NCR', 'Mumbai', 'Bengaluru', 'Goa', 'Jaipur', 'Hyderabad'].map((city) => (
+              {['Delhi NCR', 'Mumbai', 'Bangalore', 'Goa', 'Hyderabad', 'Jaipur'].map((city) => (
                 <li key={city}>
-                  <Link to={`/cars?location=${encodeURIComponent(city)}`} className="text-white/70 hover:text-white transition-colors">
+                  <Link to={`/cars?location=${encodeURIComponent(city)}`} className="text-[#9B9B9B] hover:text-[#F4F2ED] transition-colors">
                     {city}
                   </Link>
                 </li>
@@ -72,42 +67,66 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Col 3 */}
           <div>
-            <span className="text-white/40 uppercase tracking-widest block mb-4">
-              SERVICES
+            <span className="text-[#6E6E6E] uppercase tracking-widest block mb-4">
+              OFFERS
             </span>
             <ul className="space-y-3 uppercase tracking-wider">
-              <li><Link to="/my-bookings" className="text-white/70 hover:text-white transition-colors">My Journeys</Link></li>
-              <li><Link to="/wishlist" className="text-white/70 hover:text-white transition-colors">Saved Vehicles</Link></li>
-              <li><a href="#offers" className="text-white/70 hover:text-white transition-colors">Weekend Privileges</a></li>
-              <li><Link to="/owner" className="text-white/70 hover:text-white transition-colors">Host Fleet</Link></li>
+              {['Weekend Privileges', 'Corporate Concierge', 'Long-Distance GT', 'Airport Valet'].map((offer) => (
+                <li key={offer}>
+                  <Link to="/#offers" className="text-[#9B9B9B] hover:text-[#F4F2ED] transition-colors">
+                    {offer}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Col 4 */}
           <div>
-            <span className="text-white/40 uppercase tracking-widest block mb-4">
-              CHANNELS
+            <span className="text-[#6E6E6E] uppercase tracking-widest block mb-4">
+              ABOUT
             </span>
             <ul className="space-y-3 uppercase tracking-wider">
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors flex items-center gap-1">INSTAGRAM <ArrowUpRight className="w-3 h-3" /></a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors flex items-center gap-1">YOUTUBE <ArrowUpRight className="w-3 h-3" /></a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors flex items-center gap-1">LINKEDIN <ArrowUpRight className="w-3 h-3" /></a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors flex items-center gap-1">JOURNAL <ArrowUpRight className="w-3 h-3" /></a></li>
+              {['Automotive Club', 'Concierge Standards', 'Insurance Integrity', 'Privacy Policy'].map((about) => (
+                <li key={about}>
+                  <Link to="/#experience" className="text-[#9B9B9B] hover:text-[#F4F2ED] transition-colors">
+                    {about}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <span className="text-[#6E6E6E] uppercase tracking-widest block mb-4">
+              CONTACT
+            </span>
+            <ul className="space-y-3 text-[#9B9B9B]">
+              <li>DISPATCH: +91 11 4982 0000</li>
+              <li>CONCIERGE@CARRENTAL.COM</li>
+              <li>DELHI // MUMBAI // BANGALORE</li>
+              <li className="pt-2">
+                <span className="text-[#C5A880] text-[10px] tracking-widest uppercase block">
+                  CHASE LIAISON ON CALL 24/7
+                </span>
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono text-white/40 uppercase tracking-widest">
-          <div>
-            CAR RENTAL © {currentYear} // ALL RIGHTS RESERVED
+        {/* 29 — Bottom: CAR RENTAL © 2026 */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[#6E6E6E]">
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-[#C5A880]" />
+            <span className="text-[#F4F2ED] font-bold uppercase tracking-widest">
+              CAR RENTAL © 2026
+            </span>
           </div>
-          <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-white transition-colors">PRIVACY POLICY</a>
-            <a href="#" className="hover:text-white transition-colors">TERMS OF SERVICE</a>
-            <a href="#" className="hover:text-white transition-colors">CONCIERGE CONTACT</a>
+
+          <div className="flex items-center gap-6 uppercase tracking-wider text-[11px]">
+            <span>ALL RIGHTS RESERVED</span>
+            <span>•</span>
+            <span>PREMIUM AUTOMOTIVE MOBILITY</span>
           </div>
         </div>
       </div>

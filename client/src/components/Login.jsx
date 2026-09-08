@@ -50,76 +50,81 @@ const Login = () => {
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+        className="absolute inset-0 bg-black/85 backdrop-blur-xs"
         onClick={() => setShowLogin(false)}
       />
 
-      {/* Editorial Modal */}
-      <div className="relative bg-[#F3F1EC] border border-[#111111] shadow-2xl w-full max-w-md overflow-hidden p-8 sm:p-10 animate-scale-in">
+      {/* Dark Automotive Club Modal */}
+      <div className="relative bg-[#141414] border border-white/14 shadow-2xl w-full max-w-md overflow-hidden p-8 sm:p-10 animate-fade-in text-[#F4F2ED]">
         {/* Close Button */}
         <button
           onClick={() => setShowLogin(false)}
-          className="absolute top-6 right-6 p-2 border border-[#D8D5CF] hover:border-[#111111] transition-colors cursor-pointer"
-          aria-label="Close"
+          className="absolute top-6 right-6 p-1.5 border border-white/14 hover:border-white text-[#9B9B9B] hover:text-white transition-colors cursor-pointer"
+          aria-label="Close modal"
         >
-          <X className="w-4 h-4 text-[#111111]" />
+          <X className="w-4 h-4" />
         </button>
 
-        {/* Header */}
-        <div className="pb-6 border-b border-[#D8D5CF] mb-8">
+        {/* Modal Header */}
+        <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 bg-[#651F2A]" />
-            <span className="text-[10px] font-mono tracking-widest text-[#707070] uppercase">
-              01 // DRIVER CREDENTIALS
+            <span className="w-2 h-2 rounded-full bg-[#C5A880]" />
+            <span className="text-[10px] font-mono tracking-widest text-[#C5A880] uppercase font-bold">
+              CLUB ACCESS // 2026
             </span>
           </div>
-          <h2 className="text-3xl font-editorial font-bold uppercase tracking-tight text-[#111111]">
-            {isSignUp ? 'REGISTER PROFILE' : 'DRIVER SIGN IN'}
+
+          <h2 className="text-3xl font-display font-extrabold uppercase text-[#F4F2ED]">
+            {isSignUp ? 'BECOME A MEMBER' : 'MEMBER SIGN IN'}
           </h2>
-          <p className="text-xs font-mono text-[#707070] mt-1 uppercase">
+
+          <p className="text-xs font-mono text-[#9B9B9B] mt-1.5 leading-relaxed">
             {isSignUp
-              ? 'Access tier-one automotive allocations'
-              : 'Sign in to access your reserved chassis'
-            }
+              ? 'Initialize your exclusive driver profile for direct airfield dispatches.'
+              : 'Enter credentials to manage active allocations and telematics.'}
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5 text-xs font-mono">
+        <form onSubmit={handleSubmit} className="space-y-4 font-mono text-xs">
           {isSignUp && (
             <div>
-              <label className="text-[#707070] uppercase tracking-wider block mb-1">
+              <label className="text-[10px] uppercase text-[#9B9B9B] block mb-1.5">
                 FULL NAME
               </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Lord Julian Sterling"
-                className="w-full p-3.5 bg-white border border-[#D8D5CF] text-[#111111] focus:border-[#111111] focus:outline-none"
-                required
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g. Julian Sterling"
+                  className="club-input"
+                />
+              </div>
             </div>
           )}
 
           <div>
-            <label className="text-[#707070] uppercase tracking-wider block mb-1">
-              EMAIL ADDRESS
+            <label className="text-[10px] uppercase text-[#9B9B9B] block mb-1.5">
+              EMAIL IDENTIFIER
             </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="driver@carrental.com"
-              className="w-full p-3.5 bg-white border border-[#D8D5CF] text-[#111111] focus:border-[#111111] focus:outline-none"
-              required
-            />
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="pilot@domain.com"
+                className="club-input"
+              />
+            </div>
           </div>
 
           <div>
-            <label className="text-[#707070] uppercase tracking-wider block mb-1">
+            <label className="text-[10px] uppercase text-[#9B9B9B] block mb-1.5">
               PASSWORD
             </label>
             <div className="relative">
@@ -128,48 +133,45 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full p-3.5 bg-white border border-[#D8D5CF] text-[#111111] focus:border-[#111111] focus:outline-none pr-10"
                 required
-                minLength={8}
+                placeholder="••••••••••••"
+                className="club-input pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#707070] hover:text-[#111111] cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B9B9B] hover:text-white cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-[#111111] hover:bg-[#651F2A] text-white text-xs font-mono uppercase font-bold tracking-widest flex items-center justify-center gap-3 transition-colors cursor-pointer shadow-md disabled:opacity-50 mt-4"
-          >
-            {loading ? (
-              <span>AUTHENTICATING...</span>
-            ) : (
-              <>
-                <span>{isSignUp ? 'INITIALIZE ACCOUNT' : 'ENTER COCKPIT'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-
-          <div className="text-center pt-2">
+          <div className="pt-2">
             <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-xs font-mono text-[#707070] hover:text-[#111111] uppercase tracking-wider cursor-pointer"
+              type="submit"
+              disabled={loading}
+              className="btn-club-primary w-full py-3.5 text-xs font-bold"
             >
-              {isSignUp
-                ? 'ALREADY REGISTERED? SIGN IN →'
-                : "NEED AN ACCOUNT? REGISTER →"}
+              <span>{loading ? 'VERIFYING...' : isSignUp ? 'CREATE MEMBER ACCOUNT' : 'ENTER CLUB'}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </form>
+
+        {/* Toggle between Sign In / Sign Up */}
+        <div className="mt-8 pt-6 border-t border-white/10 text-center text-xs font-mono">
+          <span className="text-[#9B9B9B]">
+            {isSignUp ? 'Already registered with CAR RENTAL?' : 'Seeking first-time allocation?'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="ml-2 text-[#C5A880] hover:underline uppercase font-bold cursor-pointer"
+          >
+            {isSignUp ? 'SIGN IN' : 'JOIN THE CLUB'}
+          </button>
+        </div>
       </div>
     </div>
   );
