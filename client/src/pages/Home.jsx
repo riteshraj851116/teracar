@@ -1,7 +1,6 @@
 import React from 'react';
 import Hero from '../components/Hero';
 import FeaturedSection from '../components/FeaturedSection';
-import AerodynamicFlow3D from '../components/AerodynamicFlow3D';
 import LocationsSection from '../components/LocationsSection';
 import StorytellingSection from '../components/StorytellingSection';
 import Banner from '../components/Banner';
@@ -71,9 +70,6 @@ const Home = ({ onOpenSearch }) => {
 
       {/* 25 — Experience Section */}
       <StorytellingSection />
-
-      {/* 26 — Premium 3D Section (The Machine) */}
-      <AerodynamicFlow3D />
 
       {/* 24 — Our Locations */}
       <LocationsSection />

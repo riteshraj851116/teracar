@@ -7,13 +7,13 @@ import {
 } from 'lucide-react';
 
 const WEEKLY_DATA = [
-  { day: 'Mon', revenue: 2400, bookings: 3 },
-  { day: 'Tue', revenue: 3800, bookings: 5 },
-  { day: 'Wed', revenue: 4200, bookings: 6 },
-  { day: 'Thu', revenue: 5100, bookings: 7 },
-  { day: 'Fri', revenue: 7600, bookings: 10 },
-  { day: 'Sat', revenue: 9400, bookings: 12 },
-  { day: 'Sun', revenue: 8200, bookings: 11 },
+  { day: 'Mon', revenue: 24000, bookings: 3 },
+  { day: 'Tue', revenue: 38000, bookings: 5 },
+  { day: 'Wed', revenue: 42000, bookings: 6 },
+  { day: 'Thu', revenue: 51000, bookings: 7 },
+  { day: 'Fri', revenue: 76000, bookings: 10 },
+  { day: 'Sat', revenue: 94000, bookings: 12 },
+  { day: 'Sun', revenue: 82000, bookings: 11 },
 ];
 
 const Dashboard = () => {
@@ -59,14 +59,19 @@ const Dashboard = () => {
       toast.error('No data to export');
       return;
     }
-    const headers = 'Vehicle,PickupDate,ReturnDate,Price,Status\n';
-    const rows = data.recentBookings.map(b =>
-      `"${b.car?.title || b.car?.brand || 'N/A'}","${b.pickupDate}","${b.returnDate}","${b.price}","${b.status}"`
-    ).join('\n');
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      ['Booking ID,Customer,Vehicle,From,To,Amount,Status'].join(',') +
+      '\n' +
+      data.recentBookings
+        .map(
+          (b) =>
+            `${b._id},${b.user?.name || 'Guest'},${b.car?.title || 'Car'},${b.pickupDate},${b.returnDate},${b.totalPrice},${b.status}`
+        )
+        .join('\n');
+    const encoded = encodeURI(csvContent);
     const a = document.createElement('a');
-    a.href = url;
+    a.href = encoded;
     a.download = `carrental_bookings_${Date.now()}.csv`;
     a.click();
     toast.success('Bookings exported');
@@ -75,8 +80,8 @@ const Dashboard = () => {
   if (loading || !data) {
     return (
       <div className="py-20 text-center">
-        <div className="w-8 h-8 border-2 border-accent/20 border-t-accent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm text-text-secondary">Loading dashboard...</p>
+        <div className="w-8 h-8 border border-white/20 border-t-[#C5A880] rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-xs font-mono uppercase tracking-widest text-[#9B9B9B]">Loading club telematics...</p>
       </div>
     );
   }
@@ -84,20 +89,25 @@ const Dashboard = () => {
   const maxWeekly = Math.max(...WEEKLY_DATA.map(d => chartView === 'revenue' ? d.revenue : d.bookings));
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
+    <div className="w-full max-w-6xl mx-auto flex flex-col gap-8 text-[#F4F2ED] font-mono select-none">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-white/14">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary font-editorial">Dashboard</h1>
-          <p className="text-sm text-text-secondary mt-0.5">Overview of your fleet and bookings</p>
+          <span className="text-[10px] text-[#C5A880] uppercase tracking-widest font-bold block mb-1">
+            CONTROL TOWER // 2026
+          </span>
+          <h1 className="text-3xl font-display font-extrabold uppercase text-[#F4F2ED]">
+            HOST DASHBOARD
+          </h1>
+          <p className="text-xs text-[#9B9B9B] mt-1">FLEET DISPATCH MATRIX & ALLOCATION METRICS</p>
         </div>
         <button
           onClick={handleExportCsv}
-          className="btn-outline px-4 py-2.5 text-sm rounded-lg"
+          className="btn-club-outline text-[11px] py-2.5 px-4"
         >
-          <Download className="w-4 h-4" />
-          Export CSV
+          <Download className="w-3.5 h-3.5" />
+          <span>EXPORT CSV</span>
         </button>
       </div>
 
@@ -105,7 +115,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           icon={DollarSign}
-          label="Revenue"
+          label="REVENUE"
           value={`${currency}${(data.monthlyRevenue || 0).toLocaleString()}`}
           subtitle="Total confirmed revenue"
           trend="+12%"
@@ -113,45 +123,45 @@ const Dashboard = () => {
         />
         <MetricCard
           icon={Car}
-          label="Vehicles"
+          label="VEHICLES"
           value={data.totalCars}
           subtitle="In your fleet"
         />
         <MetricCard
           icon={CheckCircle2}
-          label="Confirmed"
+          label="CONFIRMED"
           value={data.completedBookings || 0}
-          subtitle="Completed bookings"
+          subtitle="Completed allocations"
         />
         <MetricCard
           icon={Clock}
-          label="Pending"
+          label="PENDING"
           value={data.pendingBookings || 0}
-          subtitle="Awaiting confirmation"
+          subtitle="Awaiting dispatch"
           warning={data.pendingBookings > 0}
         />
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl border border-border p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div className="bg-[#141414] border border-white/14 p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h3 className="text-base font-semibold text-text-primary">Weekly Performance</h3>
-            <p className="text-xs text-text-secondary mt-0.5">Revenue and booking trends</p>
+            <span className="text-[10px] text-[#C5A880] uppercase tracking-widest block">TELEMETRY GRAPH</span>
+            <h3 className="text-lg font-display font-bold uppercase text-[#F4F2ED]">WEEKLY PERFORMANCE</h3>
           </div>
-          <div className="flex items-center gap-1 bg-bg-secondary p-1 rounded-lg text-sm">
+          <div className="flex items-center gap-1 bg-[#1B1B1B] border border-white/10 p-1 text-xs">
             <button
               onClick={() => setChartView('revenue')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                chartView === 'revenue' ? 'bg-accent text-white' : 'text-text-secondary hover:text-text-primary'
+              className={`px-3 py-1 uppercase text-[10px] tracking-wider transition-colors ${
+                chartView === 'revenue' ? 'bg-[#F4F2ED] text-[#0B0B0B] font-bold' : 'text-[#9B9B9B] hover:text-white'
               }`}
             >
               Revenue
             </button>
             <button
               onClick={() => setChartView('bookings')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                chartView === 'bookings' ? 'bg-accent text-white' : 'text-text-secondary hover:text-text-primary'
+              className={`px-3 py-1 uppercase text-[10px] tracking-wider transition-colors ${
+                chartView === 'bookings' ? 'bg-[#F4F2ED] text-[#0B0B0B] font-bold' : 'text-[#9B9B9B] hover:text-white'
               }`}
             >
               Bookings
@@ -159,57 +169,65 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 sm:gap-4 items-end h-48 pb-2 border-b border-border">
+        {/* Bar Chart Bars */}
+        <div className="flex items-end justify-between gap-3 h-48 pt-4 border-b border-white/10">
           {WEEKLY_DATA.map((item) => {
             const val = chartView === 'revenue' ? item.revenue : item.bookings;
-            const pct = Math.round((val / maxWeekly) * 100);
+            const heightPct = maxWeekly ? (val / maxWeekly) * 100 : 10;
             return (
-              <div key={item.day} className="flex flex-col items-center gap-2 h-full justify-end group">
-                <span className="text-[10px] text-text-muted font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  {chartView === 'revenue' ? `${currency}${val}` : val}
-                </span>
+              <div key={item.day} className="flex-1 flex flex-col items-center gap-2 group">
+                <div className="text-[9px] text-[#C5A880] opacity-0 group-hover:opacity-100 transition-opacity">
+                  {chartView === 'revenue' ? `${currency}${(val / 1000).toFixed(0)}k` : val}
+                </div>
                 <div
-                  className="w-full max-w-[36px] bg-accent/15 group-hover:bg-accent rounded-t transition-all duration-300"
-                  style={{ height: `${Math.max(pct, 5)}%` }}
+                  className="w-full bg-[#1B1B1B] border border-white/14 group-hover:bg-[#C5A880] transition-colors"
+                  style={{ height: `${Math.max(8, heightPct)}%` }}
                 />
-                <span className="text-[10px] text-text-muted font-medium">{item.day}</span>
+                <span className="text-[10px] text-[#9B9B9B]">{item.day}</span>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Recent Bookings */}
-      <div className="bg-white rounded-xl border border-border p-6">
-        <h3 className="text-base font-semibold text-text-primary mb-4">Recent Bookings</h3>
+      {/* Recent Allocations Table */}
+      <div className="bg-[#141414] border border-white/14 p-6 sm:p-8">
+        <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+          <h3 className="text-base font-display font-bold uppercase text-[#F4F2ED]">
+            RECENT DISPATCHES
+          </h3>
+          <span className="text-xs text-[#9B9B9B]">
+            {data.recentBookings?.length || 0} TOTAL RECORDED
+          </span>
+        </div>
 
-        {data.recentBookings?.length > 0 ? (
+        {!data.recentBookings?.length ? (
+          <div className="py-12 text-center text-xs text-[#9B9B9B] uppercase">
+            No recent allocations recorded in database.
+          </div>
+        ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border text-xs text-text-secondary uppercase">
-                  <th className="py-3 px-3 font-medium">Vehicle</th>
-                  <th className="py-3 px-3 font-medium">Dates</th>
-                  <th className="py-3 px-3 font-medium">Amount</th>
-                  <th className="py-3 px-3 font-medium">Status</th>
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-white/10 text-[#6E6E6E] uppercase text-[10px]">
+                <tr>
+                  <th className="py-3 px-2">CUSTOMER</th>
+                  <th className="py-3 px-2">VEHICLE</th>
+                  <th className="py-3 px-2">DATES</th>
+                  <th className="py-3 px-2">TARIFF</th>
+                  <th className="py-3 px-2 text-right">STATUS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-white/10">
                 {data.recentBookings.map((b) => (
-                  <tr key={b._id} className="hover:bg-bg-secondary transition-colors">
-                    <td className="py-3 px-3 font-medium text-text-primary">
-                      {b.car?.title || b.car?.brand || 'Vehicle'}
+                  <tr key={b._id} className="hover:bg-[#1B1B1B]/40 transition-colors">
+                    <td className="py-3 px-2 text-[#F4F2ED] font-bold">{b.user?.name || 'Guest Pilot'}</td>
+                    <td className="py-3 px-2 text-[#9B9B9B]">{b.car?.title || b.car?.model || 'Vehicle'}</td>
+                    <td className="py-3 px-2 text-[#6E6E6E]">
+                      {new Date(b.pickupDate).toLocaleDateString()} — {new Date(b.returnDate).toLocaleDateString()}
                     </td>
-                    <td className="py-3 px-3 text-text-secondary text-xs">
-                      {new Date(b.pickupDate).toLocaleDateString()} → {new Date(b.returnDate).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-text-primary">
-                      {currency}{b.price?.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className={`badge text-[10px] ${
-                        b.status === 'confirmed' ? 'badge-success' : b.status === 'cancelled' ? 'badge-error' : 'badge-warning'
-                      }`}>
+                    <td className="py-3 px-2 font-bold text-[#F4F2ED]">{currency}{Number(b.totalPrice || 0).toLocaleString()}</td>
+                    <td className="py-3 px-2 text-right">
+                      <span className="px-2 py-0.5 border border-[#C5A880]/40 text-[#C5A880] text-[9px] uppercase">
                         {b.status}
                       </span>
                     </td>
@@ -218,8 +236,6 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
-        ) : (
-          <p className="text-sm text-text-secondary py-8 text-center">No bookings yet</p>
         )}
       </div>
     </div>
@@ -227,21 +243,19 @@ const Dashboard = () => {
 };
 
 const MetricCard = ({ icon: Icon, label, value, subtitle, trend, trendUp, warning }) => (
-  <div className="bg-white rounded-xl border border-border p-5">
-    <div className="flex items-center justify-between mb-3">
-      <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">{label}</span>
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${warning ? 'bg-warning/10' : 'bg-accent/8'}`}>
-        <Icon className={`w-4 h-4 ${warning ? 'text-warning' : 'text-accent'}`} />
-      </div>
+  <div className="bg-[#141414] border border-white/14 p-5 flex flex-col justify-between">
+    <div className="flex items-center justify-between text-[#9B9B9B] mb-3">
+      <span className="text-[10px] uppercase tracking-widest">{label}</span>
+      <Icon className={`w-4 h-4 ${warning ? 'text-amber-400' : 'text-[#C5A880]'}`} />
     </div>
-    <h3 className="text-2xl font-bold text-text-primary">{value}</h3>
-    <div className="flex items-center gap-2 mt-1">
-      <p className="text-xs text-text-muted">{subtitle}</p>
-      {trend && (
-        <span className={`text-[10px] font-semibold ${trendUp ? 'text-success' : 'text-error'}`}>
-          {trend}
-        </span>
-      )}
+    <div>
+      <div className="text-2xl font-display font-bold text-[#F4F2ED] uppercase">{value}</div>
+      <div className="flex items-center justify-between text-[10px] text-[#6E6E6E] mt-1">
+        <span>{subtitle}</span>
+        {trend && (
+          <span className={trendUp ? 'text-emerald-400' : 'text-red-400'}>{trend}</span>
+        )}
+      </div>
     </div>
   </div>
 );
