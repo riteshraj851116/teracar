@@ -53,6 +53,22 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Smooth scroll handler for in-page anchors across routes
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        const timer = setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [location.pathname, location.hash]);
+
   return (
     <div className="relative min-h-screen flex flex-col bg-[#F3F1EC] text-[#111111]">
       

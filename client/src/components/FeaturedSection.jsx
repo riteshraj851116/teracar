@@ -40,7 +40,7 @@ const FeaturedSection = () => {
   const showcaseFleet = cars.slice(0, 6);
 
   return (
-    <section className="py-28 bg-[#0B0B0B] border-b border-white/14 relative select-none" aria-label="Fleet showcase">
+    <section id="fleet" className="py-28 bg-[#0B0B0B] border-b border-white/14 relative select-none" aria-label="Fleet showcase">
       <div ref={containerRef} className="max-w-[1440px] mx-auto section-padding">
         
         {/* 10 — Section Heading */}
