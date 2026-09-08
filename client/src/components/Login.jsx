@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
-import { motion } from 'motion/react';
-import { X, Mail, Lock, User, Eye, EyeOff, Car, ArrowRight } from 'lucide-react';
+import { X, Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 const Login = () => {
   const { setShowLogin, axios, setToken, fetchUser } = useAppContext();
@@ -35,13 +34,13 @@ const Login = () => {
       if (data?.success) {
         setToken(data.token);
         await fetchUser(data.token);
-        toast.success(isSignUp ? 'Account created successfully!' : 'Welcome back!');
+        toast.success(isSignUp ? 'Account initialized' : 'Welcome back');
         setShowLogin(false);
       } else {
-        toast.error(data?.message || 'Something went wrong');
+        toast.error(data?.message || 'Authentication failed');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || 'Something went wrong');
+      toast.error(error.response?.data?.message || error.message || 'Authentication error');
     } finally {
       setLoading(false);
     }
@@ -51,144 +50,127 @@ const Login = () => {
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
         onClick={() => setShowLogin(false)}
       />
 
-      {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
-      >
+      {/* Editorial Modal */}
+      <div className="relative bg-[#F3F1EC] border border-[#111111] shadow-2xl w-full max-w-md overflow-hidden p-8 sm:p-10 animate-scale-in">
         {/* Close Button */}
         <button
           onClick={() => setShowLogin(false)}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-bg-secondary hover:bg-border flex items-center justify-center transition-colors z-10"
+          className="absolute top-6 right-6 p-2 border border-[#D8D5CF] hover:border-[#111111] transition-colors cursor-pointer"
           aria-label="Close"
         >
-          <X className="w-4 h-4 text-text-primary" />
+          <X className="w-4 h-4 text-[#111111]" />
         </button>
 
         {/* Header */}
-        <div className="px-8 pt-8 pb-6 text-center">
-          <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mx-auto mb-4">
-            <Car className="w-7 h-7 text-white" />
+        <div className="pb-6 border-b border-[#D8D5CF] mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-2 h-2 bg-[#651F2A]" />
+            <span className="text-[10px] font-mono tracking-widest text-[#707070] uppercase">
+              01 // DRIVER CREDENTIALS
+            </span>
           </div>
-          <h2 className="text-2xl font-bold text-text-primary font-editorial">
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          <h2 className="text-3xl font-editorial font-bold uppercase tracking-tight text-[#111111]">
+            {isSignUp ? 'REGISTER PROFILE' : 'DRIVER SIGN IN'}
           </h2>
-          <p className="text-sm text-text-secondary mt-1">
+          <p className="text-xs font-mono text-[#707070] mt-1 uppercase">
             {isSignUp
-              ? 'Join CAR RENTAL for premium automotive access'
-              : 'Sign in to your CAR RENTAL account'
+              ? 'Access tier-one automotive allocations'
+              : 'Sign in to access your reserved chassis'
             }
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
-          {/* Name (Sign Up only) */}
+        <form onSubmit={handleSubmit} className="space-y-5 text-xs font-mono">
           {isSignUp && (
             <div>
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">
-                Full Name
+              <label className="text-[#707070] uppercase tracking-wider block mb-1">
+                FULL NAME
               </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  className="premium-input pl-10"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Email */}
-          <div>
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
-                placeholder="you@example.com"
-                className="premium-input pl-10"
+                placeholder="Lord Julian Sterling"
+                className="w-full p-3.5 bg-white border border-[#D8D5CF] text-[#111111] focus:border-[#111111] focus:outline-none"
                 required
               />
             </div>
+          )}
+
+          <div>
+            <label className="text-[#707070] uppercase tracking-wider block mb-1">
+              EMAIL ADDRESS
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="driver@carrental.com"
+              className="w-full p-3.5 bg-white border border-[#D8D5CF] text-[#111111] focus:border-[#111111] focus:outline-none"
+              required
+            />
           </div>
 
-          {/* Password */}
           <div>
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">
-              Password
+            <label className="text-[#707070] uppercase tracking-wider block mb-1">
+              PASSWORD
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Min. 8 characters"
-                className="premium-input pl-10 pr-10"
+                placeholder="••••••••"
+                className="w-full p-3.5 bg-white border border-[#D8D5CF] text-[#111111] focus:border-[#111111] focus:outline-none pr-10"
                 required
                 minLength={8}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#707070] hover:text-[#111111] cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3.5 rounded-lg text-[15px] mt-2"
+            className="w-full py-4 bg-[#111111] hover:bg-[#651F2A] text-white text-xs font-mono uppercase font-bold tracking-widest flex items-center justify-center gap-3 transition-colors cursor-pointer shadow-md disabled:opacity-50 mt-4"
           >
             {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {isSignUp ? 'Creating Account...' : 'Signing In...'}
-              </span>
+              <span>AUTHENTICATING...</span>
             ) : (
               <>
-                {isSignUp ? 'Create Account' : 'Sign In'}
+                <span>{isSignUp ? 'INITIALIZE ACCOUNT' : 'ENTER COCKPIT'}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
 
-          {/* Toggle */}
-          <p className="text-center text-sm text-text-secondary pt-2">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+          <div className="text-center pt-2">
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-accent font-semibold hover:underline"
+              className="text-xs font-mono text-[#707070] hover:text-[#111111] uppercase tracking-wider cursor-pointer"
             >
-              {isSignUp ? 'Sign In' : 'Create Account'}
+              {isSignUp
+                ? 'ALREADY REGISTERED? SIGN IN →'
+                : "NEED AN ACCOUNT? REGISTER →"}
             </button>
-          </p>
+          </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -1,88 +1,69 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Clock, MapPin, Headphones } from 'lucide-react';
-
-const features = [
-  {
-    icon: Shield,
-    title: 'Fully Insured',
-    description: 'Every rental includes comprehensive insurance coverage for your peace of mind.',
-  },
-  {
-    icon: Clock,
-    title: 'Flexible Duration',
-    description: 'Rent for a day, a week, or a month. We adapt to your schedule.',
-  },
-  {
-    icon: MapPin,
-    title: 'Convenient Pickup',
-    description: 'Multiple locations across the city. Pick up and drop off where it suits you.',
-  },
-  {
-    icon: Headphones,
-    title: '24/7 Support',
-    description: 'Our dedicated team is available around the clock to assist you.',
-  },
-];
+import { ArrowRight, Sparkles, Percent } from 'lucide-react';
 
 const Banner = () => {
   return (
-    <section className="relative py-20 overflow-hidden" aria-label="Why choose us">
-      {/* Background */}
-      <div className="absolute inset-0 bg-text-primary" />
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(100, 30, 43, 0.3) 0%, transparent 50%),
-                           radial-gradient(circle at 75% 75%, rgba(100, 30, 43, 0.2) 0%, transparent 50%)`
-        }} />
-      </div>
+    <section id="offers" className="py-24 bg-[#F3F1EC] border-b border-[#D8D5CF] overflow-hidden">
+      <div className="max-w-[1440px] mx-auto section-padding">
+        
+        <div className="border border-[#111111] bg-[#111111] text-[#F3F1EC] p-8 sm:p-14 lg:p-20 relative overflow-hidden">
+          
+          {/* Subtle Accent Glow */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#651F2A]/30 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative max-w-[1400px] mx-auto section-padding">
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-6 h-[2px] bg-accent" />
-            <span className="text-xs font-medium tracking-[0.15em] text-accent uppercase">
-              Why Choose Us
-            </span>
-            <div className="w-6 h-[2px] bg-accent" />
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white font-editorial tracking-tight">
-            Crafted for Excellence
-          </h2>
-          <p className="text-white/60 mt-3 text-base">
-            We don't just rent cars — we deliver premium automotive experiences.
-          </p>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, idx) => {
-            const Icon = feature.icon;
-            return (
-              <div
-                key={idx}
-                className="p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/8 transition-all group"
-              >
-                <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 group-hover:bg-accent/30 transition-colors">
-                  <Icon className="w-6 h-6 text-accent" />
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-white/50 leading-relaxed">{feature.description}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+            
+            {/* Left Content */}
+            <div className="lg:col-span-7 flex flex-col items-start">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-2 h-2 rounded-full bg-[#651F2A]" />
+                <span className="text-xs font-mono tracking-widest text-white/60 uppercase">
+                  06 / CURATED PRIVILEGE
+                </span>
               </div>
-            );
-          })}
-        </div>
 
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <Link
-            to="/cars"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-lg transition-all text-[15px]"
-          >
-            Start Your Journey
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+              <h2 className="text-4xl sm:text-6xl lg:text-7xl font-editorial font-bold tracking-tight uppercase leading-[0.96] text-white">
+                LONG WEEKEND.<br />
+                <span className="text-white/60">SAVE UP TO 20%</span><br />
+                ON SELECTED FLEET.
+              </h2>
+
+              <p className="text-sm font-body text-white/70 max-w-lg mt-6 leading-relaxed">
+                Unlock preferential multi-day tariffs on Ferrari, Porsche, and Range Rover allocations. Complimentary chauffeur delivery to airport terminals and private addresses included.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-6 mt-10">
+                <Link
+                  to="/cars"
+                  data-cursor="book"
+                  data-cursor-text="SAVE"
+                  className="px-8 py-4 bg-[#651F2A] hover:bg-white hover:text-[#111111] text-white text-xs font-mono tracking-widest uppercase font-bold flex items-center gap-3 transition-all duration-300 shadow-md"
+                >
+                  <span>CLAIM PRIVILEGE RATE</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+
+                <div className="text-[10px] font-mono tracking-widest text-white/50 uppercase">
+                  USE CODE: <span className="text-white font-bold underline">WEEKEND20</span> AT CHECKOUT
+                </div>
+              </div>
+            </div>
+
+            {/* Right Artwork */}
+            <div className="lg:col-span-5 flex items-center justify-center">
+              <div className="relative w-full max-w-md">
+                <img
+                  src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop"
+                  alt="Porsche 911 Performance"
+                  className="w-full h-auto object-contain filter drop-shadow-2xl grayscale-[20%] hover:grayscale-0 transition-all duration-500"
+                />
+                <div className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-xs border border-white/20 px-3 py-1.5 text-[9px] font-mono tracking-widest text-white uppercase">
+                  RATE GUARANTEE: COMPREHENSIVE ZERO-DEDUCTIBLE
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

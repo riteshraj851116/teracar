@@ -3,22 +3,33 @@ import { useAppContext } from '../context/AppContext';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  Calendar, MapPin, Car, Clock, ArrowRight,
-  CheckCircle, XCircle, AlertCircle, BookOpen,
-  ChevronRight, Eye, Ban
+  Calendar,
+  MapPin,
+  Car,
+  Clock,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  ArrowUpRight,
+  ShieldCheck,
+  Ban
 } from 'lucide-react';
 
-const statusConfig = {
-  confirmed: { label: 'Confirmed', color: 'badge-success', icon: CheckCircle },
-  pending: { label: 'Pending', color: 'badge-warning', icon: Clock },
-  cancelled: { label: 'Cancelled', color: 'badge-error', icon: XCircle },
-};
+const TIMELINE_STEPS = [
+  { id: 'booked', label: 'BOOKED' },
+  { id: 'confirmed', label: 'CONFIRMED' },
+  { id: 'ready', label: 'READY FOR PICKUP' },
+  { id: 'active', label: 'ACTIVE JOURNEY' },
+  { id: 'completed', label: 'COMPLETED' },
+];
 
 const MyBookings = () => {
   const { axios, token, user, setShowLogin, currency, navigate } = useAppContext();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     if (!token) {
@@ -34,6 +45,9 @@ const MyBookings = () => {
       const { data } = await axios.get('/api/bookings/user');
       if (data?.success && Array.isArray(data?.bookings)) {
         setBookings(data.bookings);
+        if (data.bookings.length > 0) {
+          setExpandedId(data.bookings[0]._id);
+        }
       }
     } catch (error) {
       console.error('Error fetching bookings:', error.message);
@@ -43,7 +57,7 @@ const MyBookings = () => {
   };
 
   const handleCancel = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    if (!window.confirm('Cancel this active vehicle reservation?')) return;
 
     setCancellingId(bookingId);
     try {
@@ -52,173 +66,240 @@ const MyBookings = () => {
         status: 'cancelled',
       });
       if (data?.success) {
-        toast.success('Booking cancelled successfully');
+        toast.success('Reservation cancelled');
         fetchBookings();
       } else {
-        toast.error(data?.message || 'Failed to cancel booking');
+        toast.error(data?.message || 'Cancellation failed');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+      toast.error(error.response?.data?.message || 'Cancellation failed');
     } finally {
       setCancellingId(null);
     }
   };
 
-  // Not logged in
   if (!token) {
     return (
-      <div className="min-h-screen py-20 flex flex-col items-center justify-center text-center section-padding">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
-          <BookOpen className="w-8 h-8 text-accent" />
-        </div>
-        <h2 className="text-xl font-semibold text-text-primary mb-2">Sign in to view bookings</h2>
-        <p className="text-text-secondary mb-6">You need to be signed in to see your reservations.</p>
-        <button onClick={() => setShowLogin(true)} className="btn-primary px-6 py-3 rounded-lg text-sm">
-          Sign In
-          <ArrowRight className="w-4 h-4" />
+      <div className="min-h-screen py-24 flex flex-col items-center justify-center text-center section-padding bg-[#F3F1EC]">
+        <span className="text-xs font-mono tracking-widest text-[#707070] uppercase mb-2">
+          SECURITY ACCESS REQUIRED
+        </span>
+        <h2 className="text-3xl font-editorial font-bold uppercase mb-4">
+          SIGN IN TO ACCESS JOURNEYS
+        </h2>
+        <p className="text-sm font-body text-[#707070] max-w-sm mb-6">
+          Access your private reservations, concierge timeline, and vehicle dispatches.
+        </p>
+        <button
+          onClick={() => setShowLogin(true)}
+          className="px-8 py-4 bg-[#111111] text-white text-xs font-mono uppercase tracking-widest font-bold"
+        >
+          SIGN IN TO ACCOUNT
         </button>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen py-10 max-w-[1400px] mx-auto section-padding">
-      {/* Header */}
-      <div className="border-b border-border pb-6 mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-6 h-[2px] bg-accent" />
-          <span className="text-xs font-medium tracking-[0.15em] text-accent uppercase">
-            My Reservations
-          </span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-text-primary font-editorial tracking-tight">
-          My Bookings
-        </h1>
-        <p className="text-text-secondary mt-1">
-          {bookings.length} booking{bookings.length !== 1 ? 's' : ''}
-        </p>
-      </div>
+  const latestBooking = bookings[0];
 
-      {/* Content */}
-      {loading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-border p-5">
-              <div className="flex gap-4">
-                <div className="w-32 h-24 skeleton rounded-lg shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 w-48 skeleton" />
-                  <div className="h-4 w-32 skeleton" />
-                  <div className="h-4 w-64 skeleton" />
+  return (
+    <div className="min-h-screen py-12 bg-[#F3F1EC] text-[#111111]">
+      <div className="max-w-[1440px] mx-auto section-padding">
+        
+        {/* User Dashboard Header */}
+        <div className="pb-10 border-b border-[#D8D5CF] flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <span className="text-xs font-mono tracking-widest text-[#707070] uppercase block mb-2">
+              USER ARCHIVE // ACCOUNT: {user?.email}
+            </span>
+            <h1 className="text-4xl sm:text-6xl font-editorial font-bold tracking-tight uppercase leading-none text-[#111111]">
+              WELCOME BACK,<br />
+              <span className="text-[#651F2A]">{(user?.name || 'GUEST DRIVER').toUpperCase()}.</span>
+            </h1>
+          </div>
+
+          <div className="text-right font-mono text-xs">
+            <span className="text-[#707070] block">ACTIVE RESERVATIONS:</span>
+            <span className="text-2xl font-bold text-[#111111]">{bookings.length}</span>
+          </div>
+        </div>
+
+        {/* Current Active Journey Highlight (if exists) */}
+        {latestBooking && (
+          <div className="my-10 border border-[#111111] bg-white p-8 sm:p-10 relative overflow-hidden">
+            <div className="flex items-center justify-between pb-6 border-b border-[#D8D5CF] text-xs font-mono">
+              <span className="font-bold text-[#651F2A] uppercase">CURRENT JOURNEY SUMMARY</span>
+              <span className="px-3 py-1 bg-[#F3F1EC] border border-[#D8D5CF] uppercase">
+                STATUS: {latestBooking.status.toUpperCase()}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-center">
+              <div className="lg:col-span-7">
+                <span className="text-xs font-mono text-[#707070] uppercase">
+                  CONFIRMED ALLOCATION
+                </span>
+                <h3 className="text-3xl sm:text-4xl font-editorial font-bold uppercase mt-1">
+                  {latestBooking.car?.brand} {latestBooking.car?.model || latestBooking.car?.title}
+                </h3>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-[#707070] uppercase mt-3">
+                  <span>PICKUP: {new Date(latestBooking.pickupDate).toLocaleDateString()}</span>
+                  <span>→</span>
+                  <span>RETURN: {new Date(latestBooking.returnDate).toLocaleDateString()}</span>
                 </div>
+
+                {/* Vertical Timeline */}
+                <div className="pt-8 mt-8 border-t border-[#D8D5CF]">
+                  <span className="text-[10px] font-mono text-[#707070] uppercase tracking-widest block mb-4">
+                    DISPATCH TELEMATICS TIMELINE
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] font-mono">
+                    {TIMELINE_STEPS.map((step, sIdx) => {
+                      const isPast =
+                        latestBooking.status === 'confirmed'
+                          ? sIdx <= 1
+                          : latestBooking.status === 'cancelled'
+                          ? sIdx === 0
+                          : true;
+                      return (
+                        <div key={step.id} className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              isPast ? 'bg-[#651F2A]' : 'bg-[#D8D5CF]'
+                            }`}
+                          />
+                          <span className={isPast ? 'text-[#111111] font-bold' : 'text-[#707070]'}>
+                            {step.label}
+                          </span>
+                          {sIdx < TIMELINE_STEPS.length - 1 && (
+                            <span className="text-[#D8D5CF]">→</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 h-48 sm:h-56 bg-[#F3F1EC] border border-[#D8D5CF] p-4 flex items-center justify-center">
+                <img
+                  src={latestBooking.car?.image}
+                  alt=""
+                  className="max-h-full max-w-full object-contain filter drop-shadow-md"
+                />
               </div>
             </div>
-          ))}
-        </div>
-      ) : bookings.length > 0 ? (
-        <div className="space-y-4">
-          {bookings.map((booking) => {
-            const car = booking.car || {};
-            const status = statusConfig[booking.status] || statusConfig.pending;
-            const StatusIcon = status.icon;
-            const pickupDate = new Date(booking.pickupDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const returnDate = new Date(booking.returnDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const createdDate = new Date(booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          </div>
+        )}
 
-            return (
-              <div key={booking._id} className="bg-white rounded-xl border border-border overflow-hidden hover:border-accent/30 transition-colors">
-                <div className="flex flex-col sm:flex-row">
-                  {/* Car Image */}
-                  <div className="sm:w-48 h-40 sm:h-auto shrink-0 bg-bg-secondary overflow-hidden">
-                    <img
-                      src={car.image || 'https://via.placeholder.com/400x300?text=No+Image'}
-                      alt={car.title || car.brand || 'Vehicle'}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+        {/* All Bookings Archive */}
+        <div className="pt-8">
+          <span className="text-xs font-mono tracking-widest text-[#707070] uppercase block mb-6 font-bold">
+            HISTORICAL & UPCOMING RESERVATION ARCHIVE
+          </span>
 
-                  {/* Details */}
-                  <div className="flex-1 p-5 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between gap-3 mb-2">
+          {loading ? (
+            <div className="py-20 text-center font-mono text-xs uppercase text-[#707070]">
+              Querying reservation records...
+            </div>
+          ) : bookings.length > 0 ? (
+            <div className="divide-y divide-[#D8D5CF] border-t border-b border-[#D8D5CF]">
+              {bookings.map((b, idx) => {
+                const num = String(idx + 1).padStart(2, '0');
+                const isExpanded = expandedId === b._id;
+                const price = Number(b.price || 0);
+
+                return (
+                  <div key={b._id} className="py-6 transition-colors">
+                    <div
+                      onClick={() => setExpandedId(isExpanded ? null : b._id)}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer group"
+                    >
+                      <div className="flex items-baseline gap-6">
+                        <span className="text-xs font-mono text-[#707070]">{num}</span>
                         <div>
-                          <h3 className="text-base font-semibold text-text-primary">
-                            {car.brand} {car.model || car.title}
-                          </h3>
-                          <p className="text-xs text-text-secondary mt-0.5">
-                            Booked on {createdDate}
-                          </p>
+                          <h4 className="text-xl sm:text-2xl font-editorial font-bold uppercase text-[#111111] group-hover:text-[#651F2A] transition-colors">
+                            {b.car?.brand} {b.car?.model || b.car?.title || 'Luxury Chassis'}
+                          </h4>
+                          <span className="text-xs font-mono text-[#707070]">
+                            {new Date(b.pickupDate).toLocaleDateString()} — {new Date(b.returnDate).toLocaleDateString()}
+                          </span>
                         </div>
-                        <span className={`badge ${status.color} flex items-center gap-1`}>
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
+                      </div>
+
+                      <div className="flex items-center gap-6 font-mono text-xs">
+                        <span className="font-bold text-[#111111]">
+                          {currency}{price.toLocaleString()}
+                        </span>
+                        <span
+                          className={`px-2.5 py-1 text-[9px] uppercase font-bold border ${
+                            b.status === 'confirmed'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : b.status === 'cancelled'
+                              ? 'bg-rose-50 text-rose-800 border-rose-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}
+                        >
+                          {b.status}
+                        </span>
+                        <span className="text-[#707070] group-hover:text-[#111111]">
+                          {isExpanded ? '−' : '+'}
                         </span>
                       </div>
+                    </div>
 
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm text-text-secondary">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-accent" />
-                          <span>{pickupDate} → {returnDate}</span>
+                    {/* Expandable Details */}
+                    {isExpanded && (
+                      <div className="mt-6 pt-6 border-t border-[#D8D5CF] bg-white p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs font-mono">
+                        <div>
+                          <span className="text-[#707070] block mb-1">RESERVATION ID</span>
+                          <span className="font-bold">{b._id}</span>
                         </div>
-                        {car.location && (
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-accent" />
-                            <span>{car.location}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Bottom Actions */}
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                      <div>
-                        <span className="text-lg font-bold text-accent">{currency}{booking.price}</span>
-                        <span className="text-xs text-text-secondary ml-1">total</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {booking.status === 'pending' && (
-                          <button
-                            onClick={() => handleCancel(booking._id)}
-                            disabled={cancellingId === booking._id}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-error border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                          >
-                            <Ban className="w-3 h-3" />
-                            {cancellingId === booking._id ? 'Cancelling...' : 'Cancel'}
-                          </button>
-                        )}
-                        {car._id && (
+                        <div>
+                          <span className="text-[#707070] block mb-1">PICKUP LOCATION</span>
+                          <span className="font-bold">{b.car?.location || 'Delhi NCR Terminal 3'}</span>
+                        </div>
+                        <div className="flex items-center justify-start sm:justify-end gap-3">
+                          {b.status === 'pending' && (
+                            <button
+                              onClick={() => handleCancel(b._id)}
+                              disabled={cancellingId === b._id}
+                              className="px-4 py-2 border border-rose-300 text-rose-700 hover:bg-rose-50 uppercase font-bold cursor-pointer"
+                            >
+                              {cancellingId === b._id ? 'CANCELING...' : 'CANCEL RESERVATION'}
+                            </button>
+                          )}
                           <Link
-                            to={`/car-details/${car._id}`}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-primary border border-border rounded-lg hover:border-accent hover:text-accent transition-colors"
+                            to={`/car/${b.car?._id}`}
+                            className="px-4 py-2 bg-[#111111] text-white uppercase font-bold"
                           >
-                            <Eye className="w-3 h-3" />
-                            View Car
+                            VIEW VEHICLE SPEC
                           </Link>
-                        )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-24 text-center border border-[#D8D5CF] bg-white p-8">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#707070] block mb-2">
+                NO RESERVATION ARCHIVE
+              </span>
+              <p className="text-sm font-body text-[#707070] mb-6">
+                Your driving log is currently empty.
+              </p>
+              <Link
+                to="/cars"
+                className="px-6 py-3 bg-[#111111] text-white text-xs font-mono uppercase font-bold inline-block"
+              >
+                SELECT A VEHICLE
+              </Link>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
-            <BookOpen className="w-8 h-8 text-accent" />
-          </div>
-          <h3 className="text-xl font-semibold text-text-primary mb-2">No bookings yet</h3>
-          <p className="text-text-secondary max-w-md mb-6">
-            Start your journey by browsing our premium fleet and booking your first car.
-          </p>
-          <Link to="/cars" className="btn-primary px-6 py-3 rounded-lg text-sm">
-            Browse Cars
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

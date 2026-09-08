@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Login from "./components/Login";
 import Loader from "./components/Loader";
+import CustomCursor from "./components/CustomCursor";
+import FloatingChrome from "./components/FloatingChrome";
+import SearchOverlay from "./components/SearchOverlay";
 import Home from "./pages/Home";
 import Cars from "./pages/Cars";
 import CarDetails from "./pages/CarDetails";
@@ -34,29 +37,55 @@ const App = () => {
   const { showLogin } = useAppContext();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const isOwnerPath = location.pathname.startsWith("/owner");
 
+  // Global search keyboard shortcut (⌘K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="relative min-h-screen flex flex-col" style={{ backgroundColor: '#FAF9F7', color: '#111111' }}>
+    <div className="relative min-h-screen flex flex-col bg-[#F3F1EC] text-[#111111]">
+      
+      {/* Tactile Custom Cursor (Desktop only) */}
+      <CustomCursor />
+
+      {/* Floating Corner Viewport Chrome */}
+      {!isOwnerPath && (
+        <FloatingChrome onOpenSearch={() => setSearchOpen(true)} />
+      )}
+
+      {/* Full-Screen Search Overlay */}
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
       {/* Toast Notifications */}
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#FFFFFF',
-            color: '#111111',
-            border: '1px solid #DDDAD5',
-            fontFamily: 'Outfit, sans-serif',
-            fontSize: '14px',
-            fontWeight: '500',
-            borderRadius: '8px',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
+            background: '#111111',
+            color: '#F3F1EC',
+            border: '1px solid #D8D5CF',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '12px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            borderRadius: '0px',
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)',
           },
           success: {
             iconTheme: {
-              primary: '#641E2B',
+              primary: '#651F2A',
               secondary: '#FFFFFF',
             },
           },
@@ -69,7 +98,7 @@ const App = () => {
         }}
       />
 
-      {/* Loader */}
+      {/* Minimal Loader */}
       {isLoading && (
         <Loader onComplete={() => setIsLoading(false)} />
       )}
@@ -77,19 +106,22 @@ const App = () => {
       {/* Login Modal */}
       {showLogin && <Login />}
 
-      {/* Navbar — hide on owner pages */}
-      {!isOwnerPath && <Navbar />}
+      {/* Editorial Navigation */}
+      {!isOwnerPath && (
+        <Navbar onOpenSearch={() => setSearchOpen(true)} />
+      )}
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main className="flex-1 w-full">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home onOpenSearch={() => setSearchOpen(true)} />} />
           <Route path="/cars" element={<Cars />} />
+          <Route path="/car/:id" element={<CarDetails />} />
           <Route path="/car-details/:id" element={<CarDetails />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/wishlist" element={<Wishlist />} />
 
-          {/* Owner Routes */}
+          {/* Owner Dashboard Routes */}
           <Route
             path="/owner"
             element={
@@ -108,7 +140,7 @@ const App = () => {
         </Routes>
       </main>
 
-      {/* Footer — hide on owner pages */}
+      {/* Editorial Footer */}
       {!isOwnerPath && <Footer />}
     </div>
   );

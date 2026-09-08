@@ -4,24 +4,18 @@ import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'motion/react';
 import {
-  User as UserIcon,
-  LogOut,
   Menu,
   X,
-  LayoutDashboard,
-  ChevronDown,
-  Car,
-  Heart,
-  Bell,
   Search,
+  Heart,
   ArrowRight,
-  Settings,
-  BookOpen,
-  Star,
-  MapPin
+  LogOut,
+  LayoutDashboard,
+  User as UserIcon,
+  ChevronDown
 } from 'lucide-react';
 
-const Navbar = () => {
+const Navbar = ({ onOpenSearch }) => {
   const {
     setShowLogin,
     user,
@@ -30,8 +24,7 @@ const Navbar = () => {
     axios,
     setIsOwner,
     fetchUser,
-    favorites,
-    navigate: ctxNavigate
+    favorites
   } = useAppContext();
 
   const location = useLocation();
@@ -41,14 +34,12 @@ const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
 
-  // Scroll detection
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close user menu on outside click
   useEffect(() => {
     const handler = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -59,21 +50,10 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Close menus on route change
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
   }, [location.pathname]);
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
 
   const changeRole = async () => {
     if (!user) {
@@ -86,186 +66,177 @@ const Navbar = () => {
       if (data?.success) {
         setIsOwner(true);
         await fetchUser();
-        toast.success(data.message || 'Owner access activated');
+        toast.success(data.message || 'Host privileges enabled');
         navigate('/owner');
       } else {
-        toast.error(data?.message || 'Unable to update role');
+        toast.error(data?.message || 'Unable to update status');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
   };
 
-  const navLinks = [
-    { name: 'Cars', path: '/cars' },
-    { name: 'My Bookings', path: '/my-bookings' },
+  const navItems = [
+    { name: 'FLEET', path: '/cars' },
+    { name: 'LOCATIONS', path: '/#locations' },
+    { name: 'EXPERIENCE', path: '/#experience' },
+    { name: 'OFFERS', path: '/#offers' },
   ];
-
-  const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
 
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled ? 'premium-nav-scrolled py-3' : 'premium-nav py-4'
+        className={`sticky top-0 z-50 w-full transition-all duration-300 border-b border-[#D8D5CF] ${
+          scrolled ? 'bg-[#F3F1EC]/95 backdrop-blur-md py-3.5 shadow-xs' : 'bg-[#F3F1EC] py-4'
         }`}
       >
-        <div className="max-w-[1400px] mx-auto flex items-center justify-between section-padding">
-
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between section-padding">
+          
           {/* Brand */}
-          <Link to="/" className="flex items-center gap-3 group" aria-label="CAR RENTAL Home">
-            <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center transition-transform group-hover:scale-105">
-              <Car className="w-5 h-5 text-white" />
-            </div>
-            <div className="leading-none">
-              <span className="text-[15px] font-bold text-text-primary tracking-[0.08em] uppercase font-editorial">
-                CAR RENTAL
-              </span>
-              <span className="text-[9px] tracking-[0.15em] text-text-secondary uppercase block mt-0.5 font-medium">
-                Premium Automotive
-              </span>
-            </div>
+          <Link
+            to="/"
+            data-cursor="explore"
+            data-cursor-text="HOME"
+            className="flex items-center gap-2 group"
+          >
+            <span className="w-2.5 h-2.5 bg-[#651F2A] rounded-none group-hover:rotate-45 transition-transform duration-300" />
+            <span className="text-base sm:text-lg font-editorial font-bold tracking-tight uppercase text-[#111111]">
+              CAR RENTAL
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
-            <Link
-              to="/"
-              className={`px-4 py-2 text-[13px] font-medium rounded-md transition-colors ${
-                isActive('/') && location.pathname === '/'
-                  ? 'text-accent bg-accent/5 font-semibold'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
-              }`}
-            >
-              Home
-            </Link>
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`px-4 py-2 text-[13px] font-medium rounded-md transition-colors ${
-                  isActive(link.path)
-                    ? 'text-accent bg-accent/5 font-semibold'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+          {/* Desktop Minimal Nav */}
+          <nav className="hidden lg:flex items-center gap-8" aria-label="Main navigation">
+            {navItems.map((item) => {
+              const isHash = item.path.includes('#');
+              return isHash ? (
+                <a
+                  key={item.name}
+                  href={item.path}
+                  className="text-xs font-mono tracking-widest text-[#707070] hover:text-[#111111] transition-colors uppercase"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`text-xs font-mono tracking-widest transition-colors uppercase ${
+                    location.pathname === item.path
+                      ? 'text-[#651F2A] font-bold'
+                      : 'text-[#707070] hover:text-[#111111]'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Desktop Utilities & Actions */}
+          <div className="hidden lg:flex items-center gap-4">
+            
+            {/* Search Trigger */}
+            <button
+              onClick={onOpenSearch}
+              className="flex items-center gap-2 px-3 py-1.5 border border-[#D8D5CF] hover:border-[#111111] text-[11px] font-mono tracking-widest text-[#707070] hover:text-[#111111] transition-all cursor-pointer"
+              title="Search Fleet (⌘K)"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>SEARCH</span>
+            </button>
 
-            {/* Wishlist */}
+            {/* Saved Wishlist */}
             <button
               onClick={() => navigate('/wishlist')}
-              title="Saved Cars"
-              className="relative flex items-center justify-center w-10 h-10 rounded-lg border border-border hover:border-accent text-text-secondary hover:text-accent transition-colors"
-              aria-label={`Wishlist, ${favorites.length} saved`}
+              className="relative p-2 text-[#707070] hover:text-[#111111] transition-colors cursor-pointer"
+              title={`Saved Vehicles (${favorites.length})`}
             >
-              <Heart className={`w-[18px] h-[18px] ${favorites.length > 0 ? 'fill-accent text-accent' : ''}`} />
+              <Heart className={`w-4 h-4 ${favorites.length > 0 ? 'fill-[#651F2A] text-[#651F2A]' : ''}`} />
               {favorites.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-[18px] h-[18px] bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#651F2A] text-white text-[9px] font-mono font-bold rounded-full flex items-center justify-center">
                   {favorites.length}
                 </span>
               )}
             </button>
 
-            {/* Dashboard / Host */}
-            <button
-              onClick={() => (isOwner ? navigate('/owner') : changeRole())}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border hover:border-accent text-text-primary text-[13px] font-medium transition-colors"
-            >
-              {isOwner ? (
-                <>
-                  <LayoutDashboard className="w-4 h-4 text-accent" />
-                  <span>Dashboard</span>
-                </>
-              ) : (
-                <>
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span>Host Vehicle</span>
-                </>
-              )}
-            </button>
-
-            {/* Rent a Car CTA */}
+            {/* My Bookings */}
             <Link
-              to="/cars"
-              className="btn-primary px-5 py-2.5 text-[13px] rounded-lg"
+              to="/my-bookings"
+              className="text-xs font-mono tracking-widest text-[#707070] hover:text-[#111111] uppercase transition-colors"
             >
-              Rent a Car
-              <ArrowRight className="w-4 h-4" />
+              JOURNEYS
             </Link>
 
-            {/* User Menu */}
+            {/* Host / Owner Dashboard */}
+            <button
+              onClick={() => (isOwner ? navigate('/owner') : changeRole())}
+              className="text-xs font-mono tracking-widest text-[#707070] hover:text-[#111111] uppercase transition-colors cursor-pointer"
+            >
+              {isOwner ? 'DASHBOARD' : 'HOST VEHICLE'}
+            </button>
+
+            {/* User Auth or Profile */}
             {user ? (
-              <div ref={userMenuRef} className="relative ml-1">
+              <div ref={userMenuRef} className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 cursor-pointer"
-                  aria-expanded={userMenuOpen}
-                  aria-haspopup="true"
-                  aria-label="User menu"
+                  className="flex items-center gap-2 pl-3 border-l border-[#D8D5CF] cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold uppercase">
+                  <div className="w-7 h-7 rounded-none bg-[#111111] text-white flex items-center justify-center text-xs font-mono font-bold uppercase">
                     {user.name ? user.name[0] : 'U'}
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-text-secondary transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  <span className="text-xs font-mono uppercase text-[#111111] font-medium hidden xl:inline">
+                    {user.name?.split(' ')[0]}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-[#707070] transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 <AnimatePresence>
                   {userMenuOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute top-full right-0 mt-2 w-60 bg-white border border-border rounded-lg shadow-lg overflow-hidden z-50"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      className="absolute right-0 mt-3 w-56 bg-white border border-[#111111] shadow-xl p-3 z-50 flex flex-col gap-1 font-mono text-xs"
                     >
-                      {/* User Info */}
-                      <div className="px-4 py-3 bg-bg-secondary border-b border-border">
-                        <p className="text-sm font-semibold text-text-primary truncate">{user.name}</p>
-                        <p className="text-xs text-text-secondary truncate mt-0.5">{user.email}</p>
+                      <div className="p-2 border-b border-[#D8D5CF] mb-1">
+                        <span className="text-[10px] text-[#707070] uppercase block">SIGNED IN AS</span>
+                        <span className="font-bold text-[#111111] block truncate">{user.name}</span>
+                        <span className="text-[10px] text-[#707070] truncate block">{user.email}</span>
                       </div>
 
-                      <div className="p-1.5">
-                        {isOwner && (
-                          <button
-                            onClick={() => { setUserMenuOpen(false); navigate('/owner'); }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-text-primary hover:bg-bg-secondary rounded-md transition-colors text-left"
-                          >
-                            <LayoutDashboard className="w-4 h-4 text-text-secondary" />
-                            Owner Dashboard
-                          </button>
-                        )}
+                      {isOwner && (
                         <button
-                          onClick={() => { setUserMenuOpen(false); navigate('/my-bookings'); }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-text-primary hover:bg-bg-secondary rounded-md transition-colors text-left"
+                          onClick={() => navigate('/owner')}
+                          className="w-full text-left p-2 hover:bg-[#F3F1EC] transition-colors flex items-center gap-2"
                         >
-                          <BookOpen className="w-4 h-4 text-text-secondary" />
-                          My Bookings
+                          <LayoutDashboard className="w-3.5 h-3.5" />
+                          <span>FLEET DASHBOARD</span>
                         </button>
-                        <button
-                          onClick={() => { setUserMenuOpen(false); navigate('/wishlist'); }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-text-primary hover:bg-bg-secondary rounded-md transition-colors text-left"
-                        >
-                          <Heart className="w-4 h-4 text-text-secondary" />
-                          Saved Cars
-                        </button>
-                      </div>
+                      )}
 
-                      <div className="p-1.5 border-t border-border">
+                      <button
+                        onClick={() => navigate('/my-bookings')}
+                        className="w-full text-left p-2 hover:bg-[#F3F1EC] transition-colors"
+                      >
+                        MY RESERVATIONS
+                      </button>
+
+                      <button
+                        onClick={() => navigate('/wishlist')}
+                        className="w-full text-left p-2 hover:bg-[#F3F1EC] transition-colors"
+                      >
+                        SAVED VEHICLES
+                      </button>
+
+                      <div className="border-t border-[#D8D5CF] pt-1 mt-1">
                         <button
                           onClick={() => { setUserMenuOpen(false); logout(); }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-error hover:bg-red-50 rounded-md transition-colors text-left"
+                          className="w-full text-left p-2 text-[#651F2A] hover:bg-rose-50 transition-colors flex items-center gap-2 font-bold"
                         >
-                          <LogOut className="w-4 h-4" />
-                          Sign Out
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>SIGN OUT</span>
                         </button>
                       </div>
                     </motion.div>
@@ -275,174 +246,141 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-text-primary hover:text-accent transition-colors"
+                className="px-4 py-2 border border-[#111111] text-xs font-mono tracking-widest text-[#111111] hover:bg-[#111111] hover:text-white uppercase transition-all cursor-pointer"
               >
-                <UserIcon className="w-4 h-4" />
-                Sign In
+                SIGN IN
               </button>
             )}
+
+            {/* Quick Book CTA */}
+            <Link
+              to="/cars"
+              data-cursor="book"
+              data-cursor-text="FLEET"
+              className="px-4 py-2 bg-[#111111] hover:bg-[#651F2A] text-white text-xs font-mono tracking-widest uppercase transition-colors"
+            >
+              BOOK A CAR
+            </Link>
           </div>
 
-          {/* Mobile Hamburger */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-text-primary hover:bg-bg-secondary border border-border rounded-lg transition-colors"
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile Hamburger Trigger */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              onClick={onOpenSearch}
+              className="p-2 border border-[#D8D5CF] text-[#111111]"
+              aria-label="Open search"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 border border-[#D8D5CF] text-[#111111]"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Full-screen Editorial Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] lg:hidden"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.nav
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-[300px] max-w-[85vw] bg-white z-[70] shadow-2xl flex flex-col lg:hidden"
-              aria-label="Mobile navigation"
-            >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between p-5 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                    <Car className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm font-bold text-text-primary uppercase tracking-wider">CAR RENTAL</span>
-                </div>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="p-2 hover:bg-bg-secondary rounded-lg transition-colors"
-                  aria-label="Close menu"
-                >
-                  <X className="w-5 h-5 text-text-primary" />
-                </button>
-              </div>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 z-[60] bg-[#F3F1EC] text-[#111111] flex flex-col justify-between p-6 sm:p-10 lg:hidden overflow-y-auto"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#D8D5CF] pb-6">
+              <span className="text-xs font-mono tracking-widest text-[#707070] uppercase">
+                01 / NAVIGATION ARCHIVE
+              </span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-2 border border-[#D8D5CF]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              {/* User Info */}
-              {user && (
-                <div className="px-5 py-4 bg-bg-secondary border-b border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold uppercase">
-                      {user.name?.[0] || 'U'}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">{user.name}</p>
-                      <p className="text-xs text-text-secondary">{isOwner ? 'Owner' : 'Member'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation Links */}
-              <div className="flex-1 overflow-y-auto py-4">
-                <div className="px-4 flex flex-col gap-1">
-                  <Link
-                    to="/"
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      location.pathname === '/' ? 'bg-accent/5 text-accent' : 'text-text-primary hover:bg-bg-secondary'
-                    }`}
-                  >
-                    <Search className="w-4 h-4" />
-                    Home
-                  </Link>
-
-                  <Link
-                    to="/cars"
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive('/cars') ? 'bg-accent/5 text-accent' : 'text-text-primary hover:bg-bg-secondary'
-                    }`}
-                  >
-                    <Car className="w-4 h-4" />
-                    Browse Cars
-                  </Link>
-
-                  <Link
-                    to="/my-bookings"
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive('/my-bookings') ? 'bg-accent/5 text-accent' : 'text-text-primary hover:bg-bg-secondary'
-                    }`}
-                  >
-                    <BookOpen className="w-4 h-4" />
-                    My Bookings
-                  </Link>
-
-                  <Link
-                    to="/wishlist"
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive('/wishlist') ? 'bg-accent/5 text-accent' : 'text-text-primary hover:bg-bg-secondary'
-                    }`}
-                  >
-                    <Heart className="w-4 h-4" />
-                    Saved Cars
-                    {favorites.length > 0 && (
-                      <span className="ml-auto bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        {favorites.length}
-                      </span>
-                    )}
-                  </Link>
-
-                  {user && (
-                    <>
-                      <div className="divider my-2" />
-                      <button
-                        onClick={() => { setMobileOpen(false); isOwner ? navigate('/owner') : changeRole(); }}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-text-primary hover:bg-bg-secondary transition-colors text-left w-full"
-                      >
-                        <LayoutDashboard className="w-4 h-4" />
-                        {isOwner ? 'Owner Dashboard' : 'Become a Host'}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Bottom Actions */}
-              <div className="p-4 border-t border-border space-y-2">
+            {/* Oversized Mobile Links */}
+            <nav className="flex flex-col gap-6 py-12">
+              {[
+                { name: 'SELECTED FLEET', path: '/cars' },
+                { name: 'JOURNEYS & BOOKINGS', path: '/my-bookings' },
+                { name: 'SAVED ARCHIVE', path: '/wishlist' },
+                { name: 'METROPOLITAN HUBS', path: '/#locations' },
+              ].map((item, idx) => (
                 <Link
-                  to="/cars"
+                  key={item.name}
+                  to={item.path}
                   onClick={() => setMobileOpen(false)}
-                  className="btn-primary w-full py-3 text-sm rounded-lg"
+                  className="flex items-baseline gap-4 group"
                 >
-                  Rent a Car
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="text-xs font-mono text-[#707070]">0{idx + 1}</span>
+                  <span className="text-3xl sm:text-4xl font-editorial font-bold tracking-tight uppercase group-hover:text-[#651F2A] transition-colors">
+                    {item.name}
+                  </span>
                 </Link>
-                {user ? (
+              ))}
+
+              {isOwner ? (
+                <Link
+                  to="/owner"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-baseline gap-4 group pt-4 border-t border-[#D8D5CF]"
+                >
+                  <span className="text-xs font-mono text-[#707070]">05</span>
+                  <span className="text-2xl font-editorial font-bold uppercase text-[#651F2A]">
+                    OWNER DASHBOARD
+                  </span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => { setMobileOpen(false); changeRole(); }}
+                  className="flex items-baseline gap-4 group pt-4 border-t border-[#D8D5CF] text-left cursor-pointer"
+                >
+                  <span className="text-xs font-mono text-[#707070]">05</span>
+                  <span className="text-2xl font-editorial font-bold uppercase text-[#111111] group-hover:text-[#651F2A]">
+                    HOST VEHICLE
+                  </span>
+                </button>
+              )}
+            </nav>
+
+            {/* Mobile Footer Auth & Actions */}
+            <div className="border-t border-[#D8D5CF] pt-6 flex flex-col gap-3">
+              {user ? (
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span>SIGNED IN: <strong className="uppercase">{user.name}</strong></span>
                   <button
                     onClick={() => { setMobileOpen(false); logout(); }}
-                    className="btn-outline w-full py-3 text-sm rounded-lg text-error border-red-200 hover:bg-red-50"
+                    className="text-[#651F2A] font-bold"
                   >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
+                    SIGN OUT
                   </button>
-                ) : (
-                  <button
-                    onClick={() => { setMobileOpen(false); setShowLogin(true); }}
-                    className="btn-outline w-full py-3 text-sm rounded-lg"
-                  >
-                    <UserIcon className="w-4 h-4" />
-                    Sign In
-                  </button>
-                )}
-              </div>
-            </motion.nav>
-          </>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setMobileOpen(false); setShowLogin(true); }}
+                  className="w-full py-4 bg-white border border-[#111111] text-xs font-mono tracking-widest uppercase font-bold"
+                >
+                  SIGN IN TO ACCOUNT
+                </button>
+              )}
+
+              <Link
+                to="/cars"
+                onClick={() => setMobileOpen(false)}
+                className="w-full py-4 bg-[#111111] text-white text-xs font-mono tracking-widest uppercase font-bold flex items-center justify-center gap-2"
+              >
+                <span>EXPLORE ENTIRE FLEET</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

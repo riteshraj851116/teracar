@@ -1,324 +1,186 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAppContext } from '../context/AppContext';
-import { motion } from 'motion/react';
-import {
-  Calendar,
-  ArrowRight,
-  MapPin,
-  Clock,
-  ChevronRight,
-  Play,
-  Shield,
-  Sparkles,
-  Star
-} from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import gsap from 'gsap';
+import { ArrowRight, Sparkles, ChevronDown } from 'lucide-react';
 
-const HERO_VEHICLES = [
-  {
-    name: "Mercedes-AMG GT",
-    tagline: "Performance Redefined",
-    image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=1400&auto=format&fit=crop",
-  },
-  {
-    name: "Porsche 911 GT3",
-    tagline: "Track Heritage",
-    image: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1400&auto=format&fit=crop",
-  },
-  {
-    name: "BMW M8 Competition",
-    tagline: "Grand Touring",
-    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1400&auto=format&fit=crop",
-  },
-];
+const Hero = ({ onOpenSearch }) => {
+  const navigate = useNavigate();
+  const heroRef = useRef(null);
+  const headlineRef = useRef(null);
+  const carImageRef = useRef(null);
+  const metaRef = useRef(null);
+  const ctaRef = useRef(null);
+  const scrollRef = useRef(null);
 
-const Hero = () => {
-  const { navigate, pickupDate, setPickupDate, returnDate, setReturnDate, cars } = useAppContext();
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [location, setLocation] = useState('');
-  const timerRef = useRef(null);
-
-  // Auto-rotate hero slides
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % HERO_VEHICLES.length);
-    }, 6000);
-    return () => clearInterval(timerRef.current);
+    const ctx = gsap.context(() => {
+      // Precise, cinematic GSAP timeline
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // Metadata entrance
+      tl.fromTo(
+        metaRef.current,
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 1.0, delay: 0.2 }
+      );
+
+      // Oversized typography line-by-line reveal
+      if (headlineRef.current) {
+        const lines = headlineRef.current.querySelectorAll('.hero-line');
+        tl.fromTo(
+          lines,
+          { y: 60, opacity: 0, clipPath: 'polygon(0 0, 100% 0, 100% 0%, 0 0%)' },
+          {
+            y: 0,
+            opacity: 1,
+            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+            duration: 1.2,
+            stagger: 0.15,
+          },
+          '-=0.7'
+        );
+      }
+
+      // Vehicle image scale & reveal
+      tl.fromTo(
+        carImageRef.current,
+        { scale: 0.92, opacity: 0, x: 40 },
+        { scale: 1, opacity: 1, x: 0, duration: 1.5, ease: 'power2.out' },
+        '-=1.2'
+      );
+
+      // CTAs
+      tl.fromTo(
+        ctaRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.9 },
+        '-=0.8'
+      );
+
+      // Scroll indicator subtle float
+      gsap.to(scrollRef.current, {
+        y: 6,
+        repeat: -1,
+        yoyo: true,
+        duration: 1.8,
+        ease: 'sine.inOut',
+      });
+    }, heroRef);
+
+    return () => ctx.revert();
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    navigate('/cars');
-  };
-
-  const currentVehicle = HERO_VEHICLES[activeSlide];
-
   return (
-    <section className="relative" aria-label="Hero section">
-
-      {/* Hero Image + Overlay */}
-      <div className="relative h-[85vh] min-h-[600px] max-h-[900px] overflow-hidden">
-        {/* Background Image */}
-        {HERO_VEHICLES.map((vehicle, idx) => (
-          <div
-            key={idx}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              idx === activeSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <img
-              src={vehicle.image}
-              alt={vehicle.name}
-              className="w-full h-full object-cover"
-              loading={idx === 0 ? "eager" : "lazy"}
-            />
-          </div>
-        ))}
-
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-
-        {/* Content */}
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-[1400px] mx-auto w-full section-padding">
-            <div className="max-w-2xl">
-
-              {/* Tagline */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex items-center gap-3 mb-6"
-              >
-                <div className="w-8 h-[2px] bg-white/60" />
-                <span className="text-xs font-medium tracking-[0.2em] text-white/70 uppercase">
-                  Premium Automotive Experience
-                </span>
-              </motion.div>
-
-              {/* Headline */}
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.3 }}
-                className="text-4xl sm:text-5xl lg:text-[3.8rem] xl:text-[4.2rem] font-bold text-white leading-[1.08] tracking-tight font-editorial"
-              >
-                Drive Something
-                <br />
-                <span className="text-white/90">Worth Remembering.</span>
-              </motion.h1>
-
-              {/* Supporting Text */}
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-base sm:text-lg text-white/70 mt-5 max-w-lg leading-relaxed"
-              >
-                Premium cars. Flexible rentals. Effortless journeys.
-              </motion.p>
-
-              {/* CTAs */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="flex flex-wrap items-center gap-3 mt-8"
-              >
-                <button
-                  onClick={() => navigate('/cars')}
-                  className="btn-primary px-7 py-3.5 text-[15px] rounded-lg"
-                >
-                  Explore Cars
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    const searchEl = document.getElementById('hero-search');
-                    if (searchEl) searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-lg text-[15px] font-medium transition-all"
-                >
-                  Find Your Car
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-
-              {/* Trust Indicators */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1 }}
-                className="flex items-center gap-6 mt-10"
-              >
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <Shield className="w-4 h-4 text-white/50" />
-                  <span>Fully Insured</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <Star className="w-4 h-4 text-white/50" />
-                  <span>4.9 Rating</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <Sparkles className="w-4 h-4 text-white/50" />
-                  <span>Premium Fleet</span>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-
-        {/* Slide Indicators */}
-        <div className="absolute bottom-8 left-0 right-0">
-          <div className="max-w-[1400px] mx-auto section-padding">
-            <div className="flex items-center gap-3">
-              {HERO_VEHICLES.map((vehicle, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setActiveSlide(idx);
-                    clearInterval(timerRef.current);
-                    timerRef.current = setInterval(() => {
-                      setActiveSlide((prev) => (prev + 1) % HERO_VEHICLES.length);
-                    }, 6000);
-                  }}
-                  className={`transition-all ${
-                    idx === activeSlide
-                      ? 'w-12 h-1 bg-white rounded-full'
-                      : 'w-6 h-1 bg-white/30 rounded-full hover:bg-white/50'
-                  }`}
-                  aria-label={`Show ${vehicle.name}`}
-                />
-              ))}
-              <span className="ml-4 text-xs text-white/50 font-medium">
-                {String(activeSlide + 1).padStart(2, '0')} / {String(HERO_VEHICLES.length).padStart(2, '0')}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Section */}
-      <div id="hero-search" className="relative -mt-16 z-10 max-w-[1400px] mx-auto section-padding">
-        <form
-          onSubmit={handleSearch}
-          className="bg-white rounded-xl border border-border shadow-lg p-6 md:p-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-text-primary">Find Your Perfect Car</h2>
-              <p className="text-sm text-text-secondary mt-0.5">Search from {cars.length || 'our'} premium vehicles</p>
-            </div>
-            <span className="badge badge-accent hidden sm:flex">
-              <Sparkles className="w-3 h-3" />
-              Instant Booking
+    <section
+      ref={heroRef}
+      className="relative min-h-[92vh] flex flex-col justify-between pt-12 pb-10 bg-[#F3F1EC] overflow-hidden select-none border-b border-[#D8D5CF]"
+      aria-label="Hero section"
+    >
+      {/* Top Metadata Strip */}
+      <div ref={metaRef} className="max-w-[1440px] mx-auto w-full section-padding">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-[#D8D5CF]">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono tracking-widest text-[#111111] uppercase font-bold">
+              01 / CAR RENTAL
+            </span>
+            <span className="w-8 h-px bg-[#D8D5CF]" />
+            <span className="text-[11px] font-mono tracking-widest text-[#707070] uppercase">
+              ALL-INCLUSIVE AUTOMOTIVE FLEET
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* Pickup Location */}
-            <div className="lg:col-span-1">
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-accent" />
-                Pickup Location
-              </label>
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="premium-input"
-              >
-                <option value="">Any Location</option>
-                <option value="New York">New York</option>
-                <option value="Los Angeles">Los Angeles</option>
-                <option value="Chicago">Chicago</option>
-                <option value="Houston">Houston</option>
-                <option value="Miami">Miami</option>
-                <option value="San Francisco">San Francisco</option>
-              </select>
-            </div>
-
-            {/* Pickup Date */}
-            <div>
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-accent" />
-                Pickup Date
-              </label>
-              <input
-                type="date"
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="premium-input"
-              />
-            </div>
-
-            {/* Pickup Time */}
-            <div>
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-accent" />
-                Pickup Time
-              </label>
-              <select className="premium-input">
-                <option value="09:00">09:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="13:00">01:00 PM</option>
-                <option value="14:00">02:00 PM</option>
-                <option value="15:00">03:00 PM</option>
-                <option value="16:00">04:00 PM</option>
-                <option value="17:00">05:00 PM</option>
-                <option value="18:00">06:00 PM</option>
-              </select>
-            </div>
-
-            {/* Return Date */}
-            <div>
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-accent" />
-                Return Date
-              </label>
-              <input
-                type="date"
-                value={returnDate}
-                onChange={(e) => setReturnDate(e.target.value)}
-                min={pickupDate || new Date().toISOString().split('T')[0]}
-                className="premium-input"
-              />
-            </div>
-
-            {/* Search Button */}
-            <div className="flex items-end">
-              <button
-                type="submit"
-                className="btn-primary w-full py-3 rounded-lg text-sm"
-              >
-                Find Available Cars
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+          <div className="hidden sm:flex items-center gap-6 text-[11px] font-mono tracking-widest text-[#707070] uppercase">
+            <span>CHAUFFEUR & SELF-DRIVE</span>
+            <span className="w-1 h-1 rounded-full bg-[#651F2A]" />
+            <span>DISCREET AIRPORT DISPATCH</span>
           </div>
-        </form>
+        </div>
       </div>
 
-      {/* Stats Strip */}
-      <div className="max-w-[1400px] mx-auto section-padding mt-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          <div className="text-center md:text-left">
-            <p className="text-3xl font-bold text-text-primary font-editorial">500+</p>
-            <p className="text-sm text-text-secondary mt-1">Premium Vehicles</p>
+      {/* Hero Visual Composition */}
+      <div className="max-w-[1440px] mx-auto w-full section-padding my-auto py-8 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          {/* Left / Foreground Typography */}
+          <div className="lg:col-span-8 z-10">
+            <div ref={headlineRef} className="overflow-hidden">
+              <h1 className="text-5xl sm:text-7xl md:text-8xl xl:text-[7.5rem] font-editorial font-bold tracking-tight uppercase leading-[0.92] text-[#111111]">
+                <span className="hero-line block">DRIVE</span>
+                <span className="hero-line block text-[#111111]">SOMETHING</span>
+                <span className="hero-line block text-[#651F2A]">EXCEPTIONAL.</span>
+              </h1>
+            </div>
+
+            {/* Editorial Subtitle & CTAs */}
+            <div ref={ctaRef} className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <Link
+                to="/cars"
+                data-cursor="explore"
+                data-cursor-text="FLEET"
+                className="px-8 py-4 bg-[#111111] hover:bg-[#651F2A] text-white text-xs font-mono tracking-widest uppercase font-bold flex items-center gap-3 transition-all duration-300 shadow-md"
+              >
+                <span>EXPLORE FLEET</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <button
+                onClick={onOpenSearch}
+                data-cursor="explore"
+                data-cursor-text="SEARCH"
+                className="px-8 py-4 bg-transparent hover:bg-white text-[#111111] border border-[#111111] text-xs font-mono tracking-widest uppercase font-bold transition-all duration-300 cursor-pointer"
+              >
+                FIND MY CAR
+              </button>
+
+              <div className="text-[11px] font-mono text-[#707070] uppercase tracking-wider pl-2 sm:border-l sm:border-[#D8D5CF]">
+                PORSCHE • FERRARI • MCLAREN • ROLLS-ROYCE
+              </div>
+            </div>
           </div>
-          <div className="text-center md:text-left">
-            <p className="text-3xl font-bold text-text-primary font-editorial">50+</p>
-            <p className="text-sm text-text-secondary mt-1">Cities Covered</p>
+
+          {/* Right / Overlapping Massive Vehicle Artwork */}
+          <div className="lg:col-span-4 relative flex items-center justify-center lg:justify-end">
+            <div
+              ref={carImageRef}
+              data-cursor="view"
+              data-cursor-text="PORSCHE"
+              className="relative w-full max-w-[620px] lg:max-w-none lg:w-[130%] lg:-ml-[25%] pointer-events-auto"
+            >
+              {/* Soft background aura */}
+              <div className="absolute inset-0 bg-radial from-black/5 via-transparent to-transparent -z-10 blur-xl scale-95" />
+              
+              <img
+                src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1400&auto=format&fit=crop"
+                alt="Porsche 911 GT3 RS Flagship"
+                className="w-full h-auto object-contain filter drop-shadow-2xl hover:scale-105 transition-transform duration-700 ease-out"
+              />
+
+              {/* Monospaced spec badge */}
+              <div className="absolute bottom-2 right-4 bg-white/90 backdrop-blur-xs border border-[#D8D5CF] p-2.5 text-[9px] font-mono tracking-widest uppercase text-[#111111] hidden sm:block">
+                <span className="font-bold text-[#651F2A]">GT3 RS</span> // 518 HP • 4.0L
+              </div>
+            </div>
           </div>
-          <div className="text-center md:text-left">
-            <p className="text-3xl font-bold text-text-primary font-editorial">10K+</p>
-            <p className="text-sm text-text-secondary mt-1">Happy Customers</p>
+        </div>
+      </div>
+
+      {/* Bottom Viewport Indicators */}
+      <div className="max-w-[1440px] mx-auto w-full section-padding">
+        <div className="flex items-center justify-between pt-6 border-t border-[#D8D5CF]">
+          
+          {/* Scroll Indicator */}
+          <div ref={scrollRef} className="flex items-center gap-3">
+            <span className="text-[10px] font-mono tracking-widest text-[#707070] uppercase">
+              SCROLL
+            </span>
+            <ChevronDown className="w-3.5 h-3.5 text-[#651F2A]" />
+            <span className="text-[10px] font-mono text-[#111111] font-bold">
+              01
+            </span>
           </div>
-          <div className="text-center md:text-left">
-            <p className="text-3xl font-bold text-text-primary font-editorial">4.9</p>
-            <p className="text-sm text-text-secondary mt-1">Average Rating</p>
+
+          <div className="text-[10px] font-mono text-[#707070] uppercase tracking-widest">
+            EDITION 2026 // ALL VEHICLES FULLY INSURED
           </div>
         </div>
       </div>
