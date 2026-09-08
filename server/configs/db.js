@@ -18,14 +18,24 @@ const connectDB = async () => {
   try {
     isConnecting = true;
     const rawUri = process.env.MONGODB_URI || "mongodb://localhost:27017";
-    const uri = rawUri.endsWith("/")
-      ? `${rawUri}car-rental`
-      : rawUri.includes("/car-rental")
-      ? rawUri
-      : `${rawUri}/car-rental`;
+    let uri = rawUri;
+    if (!rawUri.includes("/car-rental")) {
+      if (rawUri.includes("?")) {
+        const [base, query] = rawUri.split("?");
+        uri = `${base.replace(/\/+$/, "")}/car-rental?${query}`;
+      } else {
+        uri = `${rawUri.replace(/\/+$/, "")}/car-rental`;
+      }
+    }
+
+    if (!process.env.MONGODB_URI && (process.env.VERCEL || process.env.NODE_ENV === "production")) {
+      console.warn("MONGODB_URI not configured in production environment.");
+      return null;
+    }
 
     await mongoose.connect(uri, {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
     });
     console.log("Database Connected");
     await seedDatabaseIfEmpty();

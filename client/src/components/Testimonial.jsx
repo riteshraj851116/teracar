@@ -1,68 +1,87 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, Quote } from 'lucide-react';
 
-const REVIEWS = [
+const testimonials = [
   {
-    name: 'Alexander Wright',
-    role: 'Tech Founder // Zurich',
-    comment: 'The fleet dispatch preview was sensational. Delivered a flawless Porsche 911 GT3 RS directly to my private hangar in under 25 minutes with digital key access.',
+    name: 'Alexander Mitchell',
+    role: 'Business Executive',
     rating: 5,
+    text: "Exceptional service from start to finish. The vehicle was immaculate, the booking process seamless, and the staff incredibly professional. This is how car rental should be.",
+    avatar: null,
   },
   {
-    name: 'Elena Rostova',
-    role: 'Managing Partner // Geneva',
-    comment: 'TERACAR is in a league of its own. Zero friction, impeccable vehicle preparation, and white-glove concierge dispatch that exceeds five-star hotel standards.',
+    name: 'Sarah Chen',
+    role: 'Travel Enthusiast',
     rating: 5,
+    text: "I've rented from many services, but this is the first time I felt truly valued. The car exceeded my expectations, and the flexible pickup made my trip stress-free.",
+    avatar: null,
   },
   {
-    name: 'Marcus Sterling',
-    role: 'Collector & Pilot // London',
-    comment: 'Detailed vehicle telemetry and specs gave me complete confidence before booking. The Ferrari performed with perfection on our weekend Alpine pass run.',
+    name: 'Marcus Rodriguez',
+    role: 'Photographer',
     rating: 5,
+    text: "Needed a luxury vehicle for a photoshoot — they delivered beyond expectations. Pristine condition, great rates, and the concierge service was a wonderful touch.",
+    avatar: null,
   },
 ];
 
 const Testimonial = () => {
   return (
-    <section className="py-12 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto">
-      
+    <section className="max-w-[1400px] mx-auto section-padding py-16" aria-label="Customer testimonials">
       {/* Section Header */}
-      <div className="flex flex-col mb-8 border-b border-[#E2E8F0] pb-4">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#64748B]">
-          JOURNALS // CLIENT EXPERIENCES
-        </span>
-        <h2 className="text-2xl sm:text-3xl font-bold uppercase text-[#090D16] font-editorial tracking-tight mt-1">
-          Endorsements
+      <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <div className="w-6 h-[2px] bg-accent" />
+          <span className="text-xs font-medium tracking-[0.15em] text-accent uppercase">
+            Testimonials
+          </span>
+          <div className="w-6 h-[2px] bg-accent" />
+        </div>
+        <h2 className="text-3xl sm:text-4xl font-bold text-text-primary font-editorial tracking-tight">
+          What Our Customers Say
         </h2>
+        <p className="text-text-secondary mt-2">
+          Real experiences from drivers who chose premium.
+        </p>
       </div>
 
-      {/* Cards */}
+      {/* Testimonial Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {REVIEWS.map((r, i) => (
-          <div 
-            key={i} 
-            className="p-6 bg-white border border-[#E2E8F0] rounded-lg flex flex-col justify-between gap-4 shadow-xs"
+        {testimonials.map((testimonial, idx) => (
+          <div
+            key={idx}
+            className="p-6 bg-white rounded-xl border border-border hover:border-accent/30 transition-all group"
           >
-            <p className="text-xs sm:text-sm text-[#334155] leading-relaxed">
-              "{r.comment}"
-            </p>
-            
-            <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-[#090D16] uppercase tracking-wide">{r.name}</p>
-                <p className="text-[9px] font-mono text-[#64748B] uppercase">{r.role}</p>
-              </div>
+            {/* Quote Icon */}
+            <div className="mb-4">
+              <Quote className="w-8 h-8 text-accent/20 group-hover:text-accent/40 transition-colors" />
+            </div>
 
-              <div className="flex items-center gap-0.5">
-                {[...Array(r.rating)].map((_, idx) => (
-                  <Star key={idx} className="w-3 h-3 fill-[#090D16] text-[#090D16]" />
-                ))}
+            {/* Rating */}
+            <div className="flex items-center gap-0.5 mb-3">
+              {Array.from({ length: testimonial.rating }).map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+              ))}
+            </div>
+
+            {/* Text */}
+            <p className="text-sm text-text-secondary leading-relaxed mb-5">
+              "{testimonial.text}"
+            </p>
+
+            {/* Author */}
+            <div className="flex items-center gap-3 pt-4 border-t border-border">
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <span className="text-sm font-bold text-accent">{testimonial.name[0]}</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-text-primary">{testimonial.name}</p>
+                <p className="text-xs text-text-secondary">{testimonial.role}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
-      
     </section>
   );
 };

@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import mongoose from "mongoose";
 import connectDB from "./configs/db.js";
 import userRouter from "./routes/userRoutes.js";
 import ownerRouter from "./routes/ownerRoutes.js";
@@ -19,16 +20,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serverless DB connection middleware
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-  } catch (err) {
-    console.error("DB connection middleware error:", err.message);
-  }
-  next();
-});
-
 // Root & Health Check Endpoints
 app.get("/", (req, res) => res.send("TERACAR API Server is running"));
 app.get("/api/health", (req, res) => {
@@ -36,8 +27,19 @@ app.get("/api/health", (req, res) => {
     success: true,
     message: "TERACAR API is running",
     status: "healthy",
+    dbConnected: mongoose.connection.readyState === 1,
     timestamp: new Date().toISOString()
   });
+});
+
+// Serverless DB connection middleware for API routes
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error("DB connection middleware error:", err.message);
+  }
+  next();
 });
 
 // API Routes

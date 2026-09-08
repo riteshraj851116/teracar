@@ -1,122 +1,141 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { Gauge, Fuel, Users, ArrowRight, Heart, Scale } from 'lucide-react';
-import { playUiClick } from '../utils/audioEngine';
+import {
+  Heart,
+  MapPin,
+  Fuel,
+  Users,
+  Settings2,
+  ArrowRight,
+  Star,
+} from 'lucide-react';
 
 const CarCard = ({ car }) => {
-  const { currency, navigate, toggleFavorite, isFavorite, addToCompare } = useAppContext();
+  const { currency, navigate, toggleFavorite, isFavorite } = useAppContext();
 
-  if (!car) return null;
-
-  const displayTitle = car.title || `${car.brand || ''} ${car.model || 'Spec'}`.trim() || 'Precision Chassis';
-  const displayBrand = car.brand || 'TERACAR';
-  const displayCategory = car.category || 'Luxury';
+  const carId = car._id;
+  const title = car.title || `${car.brand} ${car.model}`;
+  const image = car.image;
+  const brand = car.brand;
+  const model = car.model;
+  const year = car.year;
+  const category = car.category;
+  const seats = car.seating_capacity || car.seats || 4;
+  const fuel = car.fuel_type || car.fuelType || 'Petrol';
+  const transmission = car.transmission || 'Automatic';
   const price = car.pricePerDay || car.price || 0;
-  const isFav = isFavorite(car._id);
+  const location = car.location || '';
+  const isAvailable = car.isAvaliable !== false;
+  const rating = car.rating || 4.5;
+
+  const liked = isFavorite(carId);
 
   return (
-    <div
-      onClick={() => navigate(`/car-details/${car._id}`)}
-      className="group relative bg-white border border-[#E2E8F0] hover:border-[#090D16] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 flex flex-col justify-between shadow-xs hover:shadow-md"
-    >
-      <div>
-        {/* Car Image Stage */}
-        <div className="relative w-full h-48 sm:h-52 bg-[#F8FAFC] overflow-hidden flex items-center justify-center p-4">
-          <img
-            src={car.image}
-            alt={displayTitle}
-            className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
-            loading="lazy"
-          />
+    <div className="premium-card rounded-xl overflow-hidden group">
+      {/* Image */}
+      <div className="relative h-52 sm:h-56 overflow-hidden bg-bg-secondary">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
 
-          {/* Top Badges & Actions */}
-          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-auto">
-            <span className="px-2.5 py-0.5 bg-white border border-[#E2E8F0] text-[#090D16] text-[9px] font-mono font-bold tracking-wider uppercase rounded">
-              {displayCategory}
-            </span>
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playUiClick();
-                  addToCompare(car);
-                }}
-                title="Add to Comparison"
-                className="w-7 h-7 rounded bg-white border border-[#E2E8F0] hover:border-[#090D16] flex items-center justify-center text-[#64748B] hover:text-[#090D16] transition-colors cursor-pointer"
-              >
-                <Scale className="w-3 h-3" />
-              </button>
+        {/* Category Badge */}
+        <span className="absolute top-3 left-3 badge badge-neutral text-[10px]">
+          {category}
+        </span>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playUiClick();
-                  toggleFavorite(car._id);
-                }}
-                title={isFav ? "Remove from Saved" : "Save Vehicle"}
-                className={`w-7 h-7 rounded bg-white border transition-colors flex items-center justify-center cursor-pointer ${
-                  isFav
-                    ? 'border-rose-300 text-rose-600 bg-rose-50'
-                    : 'border-[#E2E8F0] text-[#64748B] hover:text-rose-600'
-                }`}
-              >
-                <Heart className={`w-3 h-3 ${isFav ? 'fill-rose-600 text-rose-600' : ''}`} />
-              </button>
-            </div>
-          </div>
+        {/* Favorite Button */}
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(carId); }}
+          className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            liked
+              ? 'bg-accent text-white'
+              : 'bg-white/90 backdrop-blur-sm text-text-secondary hover:text-accent'
+          }`}
+          aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
+        >
+          <Heart className={`w-4 h-4 ${liked ? 'fill-white' : ''}`} />
+        </button>
+
+        {/* Quick Book on Hover */}
+        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+          <button
+            onClick={() => navigate(`/car-details/${carId}`)}
+            className="btn-primary w-full py-2.5 text-sm rounded-lg"
+          >
+            Book Now
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Card Content */}
-        <div className="p-4 flex flex-col gap-3">
-          <div>
-            <span className="text-[9px] font-mono uppercase tracking-wider text-[#64748B]">
-              {displayBrand}
-            </span>
-            <h3 className="text-base font-bold uppercase text-[#090D16] tracking-tight truncate font-editorial">
-              {displayTitle}
-            </h3>
+        {/* Unavailable Overlay */}
+        {!isAvailable && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <span className="badge badge-error text-xs">Unavailable</span>
           </div>
-
-          {/* Specifications Specs Bar */}
-          <div className="grid grid-cols-3 gap-1.5 py-2.5 border-y border-[#E2E8F0] text-[9px] text-[#64748B] font-mono uppercase">
-            <div className="flex items-center gap-1 truncate text-[#090D16]">
-              <Gauge className="w-3 h-3 text-[#64748B]" />
-              <span className="truncate">{car.transmission || 'Auto'}</span>
-            </div>
-            <div className="flex items-center gap-1 truncate border-l border-[#E2E8F0] pl-1.5 text-[#090D16]">
-              <Fuel className="w-3 h-3 text-[#64748B]" />
-              <span className="truncate">{car.fuel_type || car.fuelType || 'Petrol'}</span>
-            </div>
-            <div className="flex items-center gap-1 truncate border-l border-[#E2E8F0] pl-1.5 text-[#090D16]">
-              <Users className="w-3 h-3 text-[#64748B]" />
-              <span className="truncate">{car.seating_capacity || car.seats ? `${car.seating_capacity || car.seats} Seats` : '2 Seats'}</span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Card Footer: Daily Price & Action */}
-      <div className="p-4 pt-0 flex items-center justify-between">
-        <div>
-          <p className="text-[8px] font-mono uppercase tracking-wider text-[#64748B]">Daily Rate</p>
-          <p className="text-lg font-bold text-[#090D16] font-mono leading-tight">
-            <span>{currency}</span>
-            <span>{price}</span>
-            <span className="text-[9px] text-[#64748B] font-normal font-sans ml-1">/ day</span>
-          </p>
+      {/* Content */}
+      <div className="p-5">
+        {/* Title & Rating */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div>
+            <h3 className="text-base font-semibold text-text-primary leading-snug group-hover:text-accent transition-colors">
+              {brand} {model}
+            </h3>
+            <p className="text-xs text-text-secondary mt-0.5">{year}</p>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <Star className="w-3.5 h-3.5 fill-accent text-accent" />
+            <span className="text-sm font-semibold text-text-primary">{rating}</span>
+          </div>
         </div>
 
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/car-details/${car._id}`);
-          }}
-          className="px-3.5 py-2 bg-[#090D16] group-hover:bg-[#1E293B] text-white rounded text-[10px] font-mono font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
+        {/* Specs */}
+        <div className="flex items-center gap-4 mt-3 pb-3 border-b border-border">
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <Settings2 className="w-3.5 h-3.5" />
+            <span className="text-xs">{transmission}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <Fuel className="w-3.5 h-3.5" />
+            <span className="text-xs">{fuel.split(' ')[0]}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <Users className="w-3.5 h-3.5" />
+            <span className="text-xs">{seats}</span>
+          </div>
+        </div>
+
+        {/* Price & Location */}
+        <div className="flex items-center justify-between mt-3">
+          <div>
+            <span className="text-lg font-bold text-accent">{currency}{price}</span>
+            <span className="text-xs text-text-secondary ml-1">/day</span>
+          </div>
+          {location && (
+            <div className="flex items-center gap-1 text-text-muted">
+              <MapPin className="w-3 h-3" />
+              <span className="text-xs truncate max-w-[100px]">{location}</span>
+            </div>
+          )}
+        </div>
+
+        {/* View Details Link */}
+        <Link
+          to={`/car-details/${carId}`}
+          className="flex items-center justify-center gap-2 mt-4 py-2.5 rounded-lg border border-border text-sm font-medium text-text-primary hover:border-accent hover:text-accent transition-colors"
         >
-          <span>Reserve</span>
-          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-        </button>
+          View Details
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
     </div>
   );

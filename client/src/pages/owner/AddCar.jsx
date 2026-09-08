@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import Title from '../../components/owner/Title';
 import toast from 'react-hot-toast';
-import { Upload, Plus, Car } from 'lucide-react';
+import { Upload, Plus, ArrowRight } from 'lucide-react';
 
 const AddCar = () => {
-  const { axios, navigate, fetchCars, setCars } = useAppContext();
+  const { axios, navigate, fetchCars, setCars, currency } = useAppContext();
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -15,13 +14,13 @@ const AddCar = () => {
     brand: '',
     model: '',
     year: new Date().getFullYear(),
-    category: 'Supercar',
+    category: 'Sedan',
     pricePerDay: '',
     transmission: 'Automatic',
     fuelType: 'Petrol',
     fuel_type: 'Petrol',
-    seats: 2,
-    seating_capacity: 2,
+    seats: 4,
+    seating_capacity: 4,
     location: '',
     description: '',
   });
@@ -50,223 +49,243 @@ const AddCar = () => {
       try {
         const { data } = await axios.post('/api/owner/add-car', formData);
         if (data?.success) {
-          toast.success('Vehicle successfully listed in fleet!');
+          toast.success('Vehicle added successfully!');
           await fetchCars();
           navigate('/owner/manage-cars');
           return;
         }
       } catch (apiErr) {
-        console.warn("API AddCar notice:", apiErr.message);
+        console.warn("AddCar API:", apiErr.message);
       }
 
-      // Local Fallback: Add vehicle locally so it works smoothly everywhere
+      // Local fallback
       const newCar = {
         _id: `car_local_${Date.now()}`,
         ...carData,
         title: carData.title || `${carData.brand} ${carData.model}`,
-        price: Number(carData.pricePerDay || 500),
-        pricePerDay: Number(carData.pricePerDay || 500),
-        image: imagePreview || 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&auto=format&fit=crop&q=80',
+        price: Number(carData.pricePerDay || 100),
+        pricePerDay: Number(carData.pricePerDay || 100),
+        image: imagePreview || '',
         isAvaliable: true,
       };
-
-      const localAdded = JSON.parse(localStorage.getItem('teracar_local_added_cars') || '[]');
-      localStorage.setItem('teracar_local_added_cars', JSON.stringify([newCar, ...localAdded]));
-      
       setCars(prev => [newCar, ...prev]);
-      toast.success('Vehicle listed into showroom fleet!');
+      toast.success('Vehicle added to fleet!');
       navigate('/owner/manage-cars');
     } catch (err) {
-      toast.error('Failed to list vehicle');
+      toast.error('Failed to add vehicle');
     } finally {
       setLoading(false);
     }
   };
 
-  const inputStyle = "w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded px-3.5 py-3 text-xs font-mono text-[#090D16] placeholder:text-[#94A3B8] outline-none focus:border-[#090D16] transition-colors mt-1";
-  const labelStyle = "text-[10px] font-mono text-[#64748B] uppercase tracking-wider block";
-
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-8">
-      
-      {/* Header Section */}
-      <Title 
-        title="List a New Vehicle" 
-        subTitle="Publish a new supercar, grand tourer, or luxury SUV into the verified fleet showroom." 
-      />
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-text-primary font-editorial">Add New Vehicle</h1>
+        <p className="text-sm text-text-secondary mt-0.5">List a new vehicle in your fleet</p>
+      </div>
 
-      {/* Main Form Box */}
-      <form onSubmit={onSubmitHandler} className="bg-white border border-[#E2E8F0] rounded-lg p-6 sm:p-8 flex flex-col gap-6 shadow-xs">
+      <form onSubmit={onSubmitHandler} className="bg-white rounded-xl border border-border p-6 sm:p-8 space-y-6">
         
-        {/* Photo Upload Zone */}
+        {/* Photo Upload */}
         <div>
-          <label className={labelStyle}>Vehicle Photography</label>
-          <label 
+          <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-2 block">
+            Vehicle Photo
+          </label>
+          <label
             htmlFor="vehicle-image-input"
-            className="mt-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-[#E2E8F0] hover:border-[#090D16] rounded bg-[#F8FAFC] cursor-pointer transition-colors"
+            className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border hover:border-accent rounded-xl bg-bg-secondary cursor-pointer transition-colors"
           >
             {imagePreview ? (
               <div className="relative w-full max-h-56 flex items-center justify-center">
-                <img src={imagePreview} alt="Preview" className="max-h-56 object-contain rounded" />
-                <span className="absolute bottom-2 px-3 py-1 bg-black/75 text-white text-[10px] font-mono rounded uppercase">Click to change photo</span>
+                <img src={imagePreview} alt="Preview" className="max-h-56 object-contain rounded-lg" />
+                <span className="absolute bottom-2 px-3 py-1 bg-black/70 text-white text-xs rounded-lg">
+                  Click to change
+                </span>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 text-[#64748B]">
-                <Upload className="w-6 h-6 text-[#090D16]" />
-                <p className="text-xs font-mono uppercase font-bold text-[#090D16]">Upload Chassis Image</p>
-                <p className="text-[10px] font-mono text-[#94A3B8]">PNG, JPG, or WEBP up to 10MB</p>
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="w-8 h-8 text-accent" />
+                <p className="text-sm font-medium text-text-primary">Upload Photo</p>
+                <p className="text-xs text-text-muted">PNG, JPG, or WEBP up to 10MB</p>
               </div>
             )}
-            <input 
-              id="vehicle-image-input" 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              onChange={handleImageChange} 
+            <input
+              id="vehicle-image-input"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
             />
           </label>
         </div>
 
-        {/* Vehicle Details Grid */}
+        {/* Details Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          
-          <label className={labelStyle}>
-            <span>Model / Title</span>
-            <input 
-              type="text" 
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Title</label>
+            <input
+              type="text"
               required
-              placeholder="E.G. 911 GT3 RS"
+              placeholder="e.g. BMW X5 2024"
               value={carData.title}
               onChange={(e) => setCarData({ ...carData, title: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             />
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Brand / Atelier</span>
-            <input 
-              type="text" 
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Brand</label>
+            <input
+              type="text"
               required
-              placeholder="E.G. PORSCHE"
+              placeholder="e.g. BMW"
               value={carData.brand}
               onChange={(e) => setCarData({ ...carData, brand: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             />
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Year</span>
-            <input 
-              type="number" 
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Model</label>
+            <input
+              type="text"
+              placeholder="e.g. X5"
+              value={carData.model}
+              onChange={(e) => setCarData({ ...carData, model: e.target.value })}
+              className="premium-input"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Year</label>
+            <input
+              type="number"
               required
               value={carData.year}
               onChange={(e) => setCarData({ ...carData, year: Number(e.target.value) })}
-              className={inputStyle}
+              className="premium-input"
             />
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Category</span>
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Category</label>
             <select
               value={carData.category}
               onChange={(e) => setCarData({ ...carData, category: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             >
+              <option value="Economy">Economy</option>
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Luxury">Luxury</option>
+              <option value="Sports">Sports</option>
+              <option value="Convertible">Convertible</option>
+              <option value="Electric">Electric</option>
+              <option value="Van">Van</option>
               <option value="Supercar">Supercar</option>
-              <option value="Luxury Sedan">Luxury Sedan</option>
-              <option value="Executive SUV">Executive SUV</option>
-              <option value="Hypercar">Hypercar</option>
-              <option value="Grand Tourer">Grand Tourer</option>
-              <option value="Electric GT">Electric GT</option>
             </select>
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Daily Rate (₹)</span>
-            <input 
-              type="number" 
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">
+              Price/Day ({currency})
+            </label>
+            <input
+              type="number"
               required
-              placeholder="E.G. 1800"
+              placeholder="e.g. 200"
               value={carData.pricePerDay}
               onChange={(e) => setCarData({ ...carData, pricePerDay: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             />
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Transmission</span>
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Transmission</label>
             <select
               value={carData.transmission}
               onChange={(e) => setCarData({ ...carData, transmission: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             >
-              <option value="Automatic">Automatic (PDK / Dual-Clutch)</option>
-              <option value="Manual">Manual (6-Speed)</option>
-              <option value="F1 Paddle-Shift">F1 Paddle-Shift</option>
+              <option value="Automatic">Automatic</option>
+              <option value="Manual">Manual</option>
+              <option value="Semi-Automatic">Semi-Automatic</option>
             </select>
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Powertrain / Fuel</span>
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Fuel Type</label>
             <select
               value={carData.fuelType}
               onChange={(e) => setCarData({ ...carData, fuelType: e.target.value, fuel_type: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             >
-              <option value="Petrol">V8 / V12 Twin-Turbo (Petrol)</option>
-              <option value="Electric">Dual-Motor Electric (EV)</option>
-              <option value="Hybrid">Hybrid V6 Electric</option>
-              <option value="Diesel">Diesel Twin-Turbo</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
             </select>
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Seating Capacity</span>
-            <input 
-              type="number" 
+          <div>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Seats</label>
+            <input
+              type="number"
               min={1}
-              max={8}
+              max={12}
               value={carData.seats}
               onChange={(e) => setCarData({ ...carData, seats: Number(e.target.value), seating_capacity: Number(e.target.value) })}
-              className={inputStyle}
+              className="premium-input"
             />
-          </label>
+          </div>
 
-          <label className={labelStyle}>
-            <span>Dispatch Hub / Location</span>
-            <input 
-              type="text" 
+          <div className="sm:col-span-2 lg:col-span-3">
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Location</label>
+            <input
+              type="text"
               required
-              placeholder="E.G. MUMBAI VIP TERMINAL"
+              placeholder="e.g. New York"
               value={carData.location}
               onChange={(e) => setCarData({ ...carData, location: e.target.value })}
-              className={inputStyle}
+              className="premium-input"
             />
-          </label>
-
+          </div>
         </div>
 
         {/* Description */}
-        <label className={labelStyle}>
-          <span>Chassis Specifications & Heritage</span>
+        <div>
+          <label className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1.5 block">Description</label>
           <textarea
             rows={3}
-            placeholder="Describe vehicle telemetry, aero packs, bespoke carbon options, and provenance..."
+            placeholder="Describe the vehicle..."
             value={carData.description}
             onChange={(e) => setCarData({ ...carData, description: e.target.value })}
-            className={inputStyle}
+            className="premium-input"
           />
-        </label>
+        </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full sm:w-auto self-end px-8 py-3.5 bg-[#090D16] hover:bg-[#1E293B] text-white rounded text-xs font-mono uppercase font-bold tracking-wider cursor-pointer disabled:opacity-50 transition-colors shadow-xs"
-        >
-          {loading ? 'PUBLISHING TO SHOWROOM...' : 'PUBLISH VEHICLE TO FLEET'}
-        </button>
-
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary px-8 py-3 rounded-lg text-sm disabled:opacity-50"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Adding Vehicle...
+              </span>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                Add Vehicle
+              </>
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );

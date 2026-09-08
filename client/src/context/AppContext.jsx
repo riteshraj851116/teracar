@@ -4,10 +4,10 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { dummyCarData } from "../assets/assets";
 
-// Base URL setup: relative in production on Vercel, localhost in local dev
-const backendURL = import.meta.env.VITE_BASE_URL !== undefined 
-  ? import.meta.env.VITE_BASE_URL 
-  : (import.meta.env.DEV ? "http://localhost:5002" : "");
+// Base URL setup
+const backendURL = import.meta.env.VITE_BASE_URL && (!import.meta.env.PROD || !import.meta.env.VITE_BASE_URL.includes("localhost"))
+  ? import.meta.env.VITE_BASE_URL
+  : (import.meta.env.DEV ? (import.meta.env.VITE_BASE_URL || "http://localhost:5002") : "");
 axios.defaults.baseURL = backendURL;
 
 export const AppContext = createContext();
@@ -16,39 +16,26 @@ export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY || "₹";
 
-  // State Variables
+  // Auth State
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [user, setUser] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  
-  // Project specific states (Car & Booking)
+
+  // Car & Booking State
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [cars, setCars] = useState(dummyCarData || []);
   const [loadingCars, setLoadingCars] = useState(false);
 
-  // Favorites / Wishlist State
+  // Wishlist State (local + will sync to server when backend supports it)
   const [favorites, setFavorites] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("teracar_favorites") || "[]");
+      return JSON.parse(localStorage.getItem("carrental_favorites") || "[]");
     } catch {
       return [];
     }
   });
-
-  // Comparison State
-  const [compareCars, setCompareCars] = useState([]);
-  const [showCompareModal, setShowCompareModal] = useState(false);
-
-  // Direct Messaging / Chat State
-  const [showChatModal, setShowChatModal] = useState(false);
-  const [activeChatCarContext, setActiveChatCarContext] = useState(null);
-
-  const openChat = (carContext = null) => {
-    setActiveChatCarContext(carContext);
-    setShowChatModal(true);
-  };
 
   // Toggle favorite
   const toggleFavorite = (carId) => {
@@ -56,43 +43,19 @@ export const AppProvider = ({ children }) => {
       let updated;
       if (prev.includes(carId)) {
         updated = prev.filter((id) => id !== carId);
-        toast.success("Removed from Saved Vehicles");
+        toast.success("Removed from saved cars");
       } else {
         updated = [...prev, carId];
-        toast.success("Saved to VIP Shortlist");
+        toast.success("Saved to wishlist");
       }
-      localStorage.setItem("teracar_favorites", JSON.stringify(updated));
+      localStorage.setItem("carrental_favorites", JSON.stringify(updated));
       return updated;
     });
   };
 
   const isFavorite = (carId) => favorites.includes(carId);
 
-  // Comparison management
-  const addToCompare = (car) => {
-    if (compareCars.some((c) => c._id === car._id)) {
-      setShowCompareModal(true);
-      return;
-    }
-    if (compareCars.length >= 3) {
-      toast.error("You can compare up to 3 vehicles at once");
-      setShowCompareModal(true);
-      return;
-    }
-    setCompareCars([...compareCars, car]);
-    toast.success(`Added ${car.title || car.brand} to Comparison Matrix`);
-    setShowCompareModal(true);
-  };
-
-  const removeFromCompare = (carId) => {
-    setCompareCars(compareCars.filter((c) => c._id !== carId));
-  };
-
-  const clearCompare = () => {
-    setCompareCars([]);
-  };
-
-  // 1. Sync token with axios default headers & localStorage
+  // Sync token with axios headers & localStorage
   useEffect(() => {
     if (token) {
       localStorage.setItem("token", token);
@@ -103,34 +66,31 @@ export const AppProvider = ({ children }) => {
     }
   }, [token]);
 
-  // 2. Fetch current logged-in user details
+  // Fetch user data
   const fetchUser = useCallback(async (authToken) => {
     const activeToken = authToken || token || localStorage.getItem("token");
-    
+
     if (!activeToken) {
       setUser(null);
       setIsOwner(false);
       return false;
     }
 
-    // Check cached demo user
-    const cachedUser = JSON.parse(localStorage.getItem("teracar_user") || "null");
+    const cachedUser = JSON.parse(localStorage.getItem("carrental_user") || "null");
 
     try {
       const { data } = await axios.get("/api/user/data", {
-        headers: {
-          Authorization: `Bearer ${activeToken}`,
-        },
+        headers: { Authorization: `Bearer ${activeToken}` },
       });
 
       if (data?.success && data?.user) {
         setUser(data.user);
         setIsOwner(data.user.role === "owner");
-        localStorage.setItem("teracar_user", JSON.stringify(data.user));
+        localStorage.setItem("carrental_user", JSON.stringify(data.user));
         return true;
       }
     } catch (error) {
-      console.warn("fetchUser live API notice:", error.response?.data?.message || error.message);
+      console.warn("fetchUser:", error.response?.data?.message || error.message);
     }
 
     if (cachedUser) {
@@ -142,7 +102,7 @@ export const AppProvider = ({ children }) => {
     return false;
   }, [token]);
 
-  // 3. Get all available cars
+  // Fetch cars
   const fetchCars = useCallback(async () => {
     try {
       setLoadingCars(true);
@@ -153,26 +113,26 @@ export const AppProvider = ({ children }) => {
         setCars(dummyCarData || []);
       }
     } catch (error) {
-      console.error("fetchCars error:", error.response?.data?.message || error.message);
+      console.error("fetchCars:", error.response?.data?.message || error.message);
       setCars(dummyCarData || []);
     } finally {
       setLoadingCars(false);
     }
   }, []);
 
-  // 4. Logout user cleanly
+  // Logout
   const logout = () => {
     setToken("");
     setUser(null);
     setIsOwner(false);
     localStorage.removeItem("token");
-    localStorage.removeItem("teracar_user");
+    localStorage.removeItem("carrental_user");
     delete axios.defaults.headers.common["Authorization"];
-    toast.success("Successfully signed out");
+    toast.success("Signed out successfully");
     navigate("/");
   };
 
-  // 5. Initial App Load
+  // Initial load
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -182,7 +142,6 @@ export const AppProvider = ({ children }) => {
     fetchCars();
   }, [fetchCars, fetchUser]);
 
-  // 6. Context Values
   const value = {
     navigate,
     currency,
@@ -208,18 +167,6 @@ export const AppProvider = ({ children }) => {
     favorites,
     toggleFavorite,
     isFavorite,
-    compareCars,
-    setCompareCars,
-    showCompareModal,
-    setShowCompareModal,
-    addToCompare,
-    removeFromCompare,
-    clearCompare,
-    showChatModal,
-    setShowChatModal,
-    activeChatCarContext,
-    setActiveChatCarContext,
-    openChat,
   };
 
   return (

@@ -1,86 +1,88 @@
 import React from 'react';
-import { useAppContext } from '../context/AppContext';
-import { ShieldCheck, Clock, ArrowRight, Zap } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { playUiClick } from '../utils/audioEngine';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Shield, Clock, MapPin, Headphones } from 'lucide-react';
+
+const features = [
+  {
+    icon: Shield,
+    title: 'Fully Insured',
+    description: 'Every rental includes comprehensive insurance coverage for your peace of mind.',
+  },
+  {
+    icon: Clock,
+    title: 'Flexible Duration',
+    description: 'Rent for a day, a week, or a month. We adapt to your schedule.',
+  },
+  {
+    icon: MapPin,
+    title: 'Convenient Pickup',
+    description: 'Multiple locations across the city. Pick up and drop off where it suits you.',
+  },
+  {
+    icon: Headphones,
+    title: '24/7 Support',
+    description: 'Our dedicated team is available around the clock to assist you.',
+  },
+];
 
 const Banner = () => {
-  const { navigate, isOwner, setIsOwner, axios, user, setShowLogin, fetchUser } = useAppContext();
-
-  const handleHostClick = async () => {
-    playUiClick();
-    if (!user) {
-      toast.error('Please sign in to register your vehicle');
-      setShowLogin(true);
-      return;
-    }
-
-    if (isOwner) {
-      navigate('/owner');
-    } else {
-      try {
-        const { data } = await axios.post('/api/owner/change-role');
-        if (data?.success) {
-          setIsOwner(true);
-          await fetchUser();
-          toast.success(data.message || 'Owner privileges activated');
-          navigate('/owner');
-        } else {
-          toast.error(data?.message || 'Failed to upgrade account');
-        }
-      } catch (err) {
-        toast.error(err.response?.data?.message || err.message || 'Something went wrong');
-      }
-    }
-  };
-
   return (
-    <section className="py-10 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto">
-      <div className="bg-[#090D16] text-white p-8 md:p-12 rounded-lg border border-[#1E293B] shadow-sm">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
-          <div className="lg:col-span-8 flex flex-col gap-4">
-            <div className="inline-flex items-center gap-2 self-start bg-white/10 px-2.5 py-1 rounded text-[9px] font-mono uppercase tracking-widest text-[#94A3B8]">
-              <span>ATELIER HOSTING PROGRAM</span>
-            </div>
+    <section className="relative py-20 overflow-hidden" aria-label="Why choose us">
+      {/* Background */}
+      <div className="absolute inset-0 bg-text-primary" />
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(100, 30, 43, 0.3) 0%, transparent 50%),
+                           radial-gradient(circle at 75% 75%, rgba(100, 30, 43, 0.2) 0%, transparent 50%)`
+        }} />
+      </div>
 
-            <h2 className="text-2xl sm:text-4xl font-bold uppercase tracking-tight font-editorial leading-tight">
-              Monetize Your High-End Chassis.<br />
-              <span className="text-[#94A3B8] font-light italic font-serif-luxury lowercase">
-                with institutional-grade asset security.
-              </span>
-            </h2>
-
-            <p className="text-[#94A3B8] text-xs sm:text-sm max-w-xl font-normal leading-relaxed">
-              Consign your vehicle into the TERACAR private network. Comprehensive $2M insurance, verified drivers, zero admin burden, and automated bi-weekly earnings.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-[10px] font-mono uppercase text-[#CBD5E1]">
-              <div className="flex items-center gap-2 bg-white/5 p-2 rounded border border-white/10">
-                <ShieldCheck className="w-3.5 h-3.5 text-white shrink-0" />
-                <span>$2M Insurance Bond</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/5 p-2 rounded border border-white/10">
-                <Clock className="w-3.5 h-3.5 text-white shrink-0" />
-                <span>24/7 Telemetry Guard</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/5 p-2 rounded border border-white/10">
-                <Zap className="w-3.5 h-3.5 text-white shrink-0" />
-                <span>Automated Payouts</span>
-              </div>
-            </div>
+      <div className="relative max-w-[1400px] mx-auto section-padding">
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="w-6 h-[2px] bg-accent" />
+            <span className="text-xs font-medium tracking-[0.15em] text-accent uppercase">
+              Why Choose Us
+            </span>
+            <div className="w-6 h-[2px] bg-accent" />
           </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white font-editorial tracking-tight">
+            Crafted for Excellence
+          </h2>
+          <p className="text-white/60 mt-3 text-base">
+            We don't just rent cars — we deliver premium automotive experiences.
+          </p>
+        </div>
 
-          <div className="lg:col-span-4 flex justify-start lg:justify-end">
-            <button
-              onClick={handleHostClick}
-              className="flex items-center gap-4 px-6 py-4 bg-white hover:bg-[#F1F5F9] text-[#090D16] rounded text-xs font-mono uppercase font-bold tracking-wider transition-colors cursor-pointer"
-            >
-              <span>{isOwner ? 'Owner Dashboard' : 'Consign Vehicle'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-          
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, idx) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={idx}
+                className="p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/8 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 group-hover:bg-accent/30 transition-colors">
+                  <Icon className="w-6 h-6 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">{feature.description}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-12">
+          <Link
+            to="/cars"
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-lg transition-all text-[15px]"
+          >
+            Start Your Journey
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </section>
